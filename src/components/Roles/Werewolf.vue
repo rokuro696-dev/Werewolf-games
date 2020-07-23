@@ -1,6 +1,13 @@
 <template>
   <div>
       {{ title }}
+
+    <br>
+    <br>
+    生存者
+      <li v-for="target in validTargets" :key="target.id">
+            <input type="submit" :value="target.name" class="btn" @click="attack(target.id)">
+      </li>
   </div>
 </template>
 
@@ -10,6 +17,15 @@ export default {
     data() {
         return {
             title: "人狼"
+        }
+    },
+    props: {
+        validTargets: Array,
+    },
+    methods:{
+        attack(id){
+            alert("clicked on " + id + " from werewolf.vue")
+            this.$emit("attack", id)
         }
     }
 }

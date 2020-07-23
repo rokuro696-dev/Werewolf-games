@@ -2,7 +2,8 @@
     <div class="board">
         <Player v-for="player in players" :key="player.id" 
                 :id="player.id" :name="player.name" :role="player.role" 
-                :status="player.status">
+                :status="player.status" :otherPlayers="players"
+                @attack="attack">
         </Player>
     </div>
 </template>
@@ -17,6 +18,11 @@ export default {
     },
     props:{
         players: Array,
+    },
+    methods:{
+        attack(id) {
+            this.$emit("attack", id)
+        }
     }
 }
 </script>

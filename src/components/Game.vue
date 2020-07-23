@@ -1,7 +1,7 @@
 <template>
   <div class="game">
     <AddPlayer v-on:add-player="addPlayer" />
-    <Board :players="players"/>
+    <Board :players="players" @attack="attack"/>
     <button v-on:click="assignRoles">Assign Roles</button>
   </div>
 </template>
@@ -22,19 +22,34 @@ export default {
         {
           id: "1",
           name: "Taro",
-          role: ""
+          role: "",
+          status: "alive",
         },
         {
           id: "2",
           name: "Jiro",
-          role: ""
+          role: "",
+          status: "alive",
         },
         {
           id: "3",
           name: "Saburo",
-          role: ""
+          role: "",
+          status: "alive"
         }
-      ]
+      ],
+      attackCandidates:[]
+    }
+  },
+  computed:{
+    aliveWerewolves: function(){
+      var aliveWerewolves = []
+        this.players.forEach(player => {
+          if (player.status === "alive" && player.role === "Werewolf"){
+            aliveWerewolves.push(player)
+          }
+        });
+        return aliveWerewolves
     }
   },
     methods: {
@@ -45,13 +60,34 @@ export default {
         this.players.forEach(player =>
           player.role = getRandomRole()
         )
-  },
+      },
+      attack(id){
+        alert("passed to Game.vue " + id)
+        
+        this.attackCandidates.push(id)
+
+        if (this.aliveWerewolves.length === this.attackCandidates.length){
+          var target = Array.from(new Set(this.attackCandidates))
+          if (target.length === 1){
+            this.players.forEach(player => {
+              if( player.id === id){
+                player.status = "dead"
+                this.attackCandidates = []
+          }
+        });
+          }
+        }
+      }
     }
 }
 
 function getRandomRole() {
   var roles = [
-    "Citizen"
+    "Citizen",
+    "FortuneTeller",
+    "Knight",
+    "Madman",
+    "Werewolf"
   ]
   var index = Math.floor(Math.random() * roles.length)
 
