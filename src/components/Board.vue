@@ -10,6 +10,7 @@
       :otherPlayers="players"
       :gameState="gameState"
       @attack="attack"
+      @protect="protect"
       @check="check"
     ></Player>
   </div>

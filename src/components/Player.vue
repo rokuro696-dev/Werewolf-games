@@ -65,7 +65,7 @@ export default {
     },
     protect(id) {
       alert("message from plauyer.vue " +id + " triggered from werewolf.vue");
-      this.$emit('protect, id')
+      this.$emit("protect", id)
     },
     check(id) {
       alert(

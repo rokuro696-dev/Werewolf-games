@@ -1,7 +1,7 @@
 <template>
   <div class="game">
     <AddPlayer v-on:add-player="addPlayer" />
-    <Board :players="players" :gameState="gameState" @attack="attack" @check="check" />
+    <Board :players="players" :gameState="gameState" @attack="attack" @protect="protect" @check="check" />
     <button v-on:click="assignRoles">Assign Roles</button>
     <div v-if="this.gameState === 'preparation'">
       <button v-on:click="startGame">ゲームを開始</button>
@@ -96,8 +96,8 @@ export default {
         if (target.length ===1){
           this.players.forEach((player) => {
             if( player.id === id){
-              player.status = "protected"
-              this.protectCandidates =[]
+              player.status = "protected";
+              this.protectCandidates =[];
             }
           });
         }
