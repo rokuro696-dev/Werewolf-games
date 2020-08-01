@@ -1,8 +1,17 @@
 <template>
   <div class="game">
     <AddPlayer v-on:add-player="addPlayer" />
-    <Board :players="players" @attack="attack"/>
+    <Board :players="players" :gameState="gameState" @attack="attack"/>
     <button v-on:click="assignRoles">Assign Roles</button>
+    <div v-if="this.gameState === 'preparation'">
+      <button v-on:click="startGame">ゲームを開始</button>
+    </div>
+    <div v-else>
+      <button v-on:click="changeGameState">次のターンに進む</button>
+    </div>
+    <div>
+      現在は {{this.gameState}}
+    </div>
   </div>
 </template>
 
@@ -15,6 +24,9 @@ export default {
   components:{
     Board,
     AddPlayer
+  },
+  props: {
+    gameState: String,
   },
   data() {
     return {
@@ -77,6 +89,12 @@ export default {
         });
           }
         }
+      },
+      startGame() {
+        this.gameState = "noon"
+      },
+      changeGameState() {
+        this.gameState === "noon" ? this.gameState = "night" : this.gameState = "noon"
       }
     }
 }

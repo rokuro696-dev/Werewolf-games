@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Game />
+    <Game gameState="preparation"/>
   </div>
 </template>
 

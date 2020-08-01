@@ -4,10 +4,13 @@
 
     <br>
     <br>
-    生存者
-      <li v-for="target in validTargets" :key="target.id">
-            <input type="submit" :value="target.name" class="btn" @click="attack(target.id)">
-      </li>
+    <div v-if="gameState === 'night'">
+        生存者
+        <li v-for="target in validTargets" :key="target.id">
+                <input type="submit" :value="target.name" class="btn" @click="attack(target.id)">
+        </li>
+    </div>
+
   </div>
 </template>
 
@@ -21,6 +24,7 @@ export default {
     },
     props: {
         validTargets: Array,
+        gameState: String,
     },
     methods:{
         attack(id){

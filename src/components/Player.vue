@@ -15,7 +15,7 @@
             <Madman></Madman>
           </p>
           <p v-else-if="this.role === 'Werewolf'">
-            <Werewolf :validTargets="alivePlayers" @attack="attack"></Werewolf>
+            <Werewolf :gameState="gameState" :validTargets="alivePlayers" @attack="attack"></Werewolf>
           </p>
           <p v-else>
             役職を決めてください。
@@ -47,6 +47,7 @@ export default {
         role: String,
         status: String,
         otherPlayers: Array,
+        gameState: String,
     },
     computed:{
       alivePlayers: function(){

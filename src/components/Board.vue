@@ -3,6 +3,7 @@
         <Player v-for="player in players" :key="player.id" 
                 :id="player.id" :name="player.name" :role="player.role" 
                 :status="player.status" :otherPlayers="players"
+                :gameState="gameState"
                 @attack="attack">
         </Player>
     </div>
@@ -18,6 +19,7 @@ export default {
     },
     props:{
         players: Array,
+        gameState: String,
     },
     methods:{
         attack(id) {
