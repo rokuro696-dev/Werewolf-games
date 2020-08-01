@@ -10,7 +10,7 @@
             <input type="submit" :value="target.name" class="btn" @click="protect(target.id)">
         </li>
       </div>
-      
+
   </div>
 </template>
 
@@ -24,6 +24,7 @@ export default {
     },
     props: {
         validTargets: Array,
+        gameState: String,
     },
     methods: {
         protect(id){
