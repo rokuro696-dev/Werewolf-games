@@ -4,10 +4,13 @@
 
       <br>
       <br>
-      生存者
+      <div v-if="gameState === 'night'">
+        生存者
         <li v-for="target in validTargets" :key="target.id">
             <input type="submit" :value="target.name" class="btn" @click="protect(target.id)">
         </li>
+      </div>
+      
   </div>
 </template>
 
