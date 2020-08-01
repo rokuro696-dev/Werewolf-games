@@ -86,6 +86,23 @@ export default {
         }
       }
     },
+    protect(id){
+      alert("passed to Game.vue " + id)
+
+      this.protectCandidates.push(id)
+
+      if(this.aliveWerewolves.length === this.protectedCandidates.length){
+        var target = Array.from(new Set(this.protectedCandidates))
+        if (target.length ===1){
+          this.players.forEach((player) => {
+            if( player.id === id){
+              player.status = "protected"
+              this.protectCandidates =[]
+            }
+          });
+        }
+      }
+    },
     check(id) {
       alert("passed to Game.vue " + id);
       this.players.forEach((player) => {

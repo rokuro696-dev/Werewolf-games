@@ -9,7 +9,7 @@
         <FortuneTeller :validTargets="alivePlayers" @check="check"></FortuneTeller>
       </p>
       <p v-else-if="this.role === 'Knight'">
-        <Knight></Knight>
+        <Knight :validTargets="alivePlayers" @protect="protect"></Knight>
       </p>
       <p v-else-if="this.role === 'Madman'">
         <Madman></Madman>
@@ -62,6 +62,10 @@ export default {
     attack(id) {
       alert("message from player.vue " + id + " triggered from werewolf.vue");
       this.$emit("attack", id);
+    },
+    protect(id) {
+      alert("message from plauyer.vue " +id + " triggered from werewolf.vue");
+      this.$emit('protect, id')
     },
     check(id) {
       alert(
