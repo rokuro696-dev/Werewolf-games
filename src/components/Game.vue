@@ -1,7 +1,7 @@
 <template>
   <div class="game">
     <AddPlayer v-on:add-player="addPlayer" />
-    <Board :players="players" :gameState="gameState" @attack="attack"/>
+    <Board :players="players" :gameState="gameState" @attack="attack" />
     <button v-on:click="assignRoles">Assign Roles</button>
     <div v-if="this.gameState === 'preparation'">
       <button v-on:click="startGame">ゲームを開始</button>
@@ -9,9 +9,7 @@
     <div v-else>
       <button v-on:click="changeGameState">次のターンに進む</button>
     </div>
-    <div>
-      現在は {{this.gameState}}
-    </div>
+    <div>現在は {{this.gameState}}</div>
   </div>
 </template>
 
@@ -20,10 +18,10 @@ import Board from "./Board";
 import AddPlayer from "./AddPlayer";
 
 export default {
-  name: 'Game',
-  components:{
+  name: "Game",
+  components: {
     Board,
-    AddPlayer
+    AddPlayer,
   },
   props: {
     gameState: String,
@@ -47,67 +45,73 @@ export default {
           id: "3",
           name: "Saburo",
           role: "",
-          status: "alive"
-        }
+          status: "alive",
+        },
       ],
-      attackCandidates:[]
-    }
+      attackCandidates: [],
+    };
   },
-  computed:{
-    aliveWerewolves: function(){
-      var aliveWerewolves = []
-        this.players.forEach(player => {
-          if (player.status === "alive" && player.role === "Werewolf"){
-            aliveWerewolves.push(player)
-          }
-        });
-        return aliveWerewolves
-    }
+  computed: {
+    aliveWerewolves: function () {
+      var aliveWerewolves = [];
+      this.players.forEach((player) => {
+        if (player.status === "alive" && player.role === "Werewolf") {
+          aliveWerewolves.push(player);
+        }
+      });
+      return aliveWerewolves;
+    },
   },
-    methods: {
-      addPlayer(newPlayer) {
-        this.players = [...this.players, newPlayer]
-      },
-      assignRoles: function() {
-        this.players.forEach(player =>
-          player.role = getRandomRole()
-        )
-      },
-      attack(id){
-        alert("passed to Game.vue " + id)
-        
-        this.attackCandidates.push(id)
+  methods: {
+    addPlayer(newPlayer) {
+      this.players = [...this.players, newPlayer];
+    },
+    assignRoles: function () {
+      this.players.forEach((player) => (player.role = getRandomRole()));
+    },
+    attack(id) {
+      alert("passed to Game.vue " + id);
 
-        if (this.aliveWerewolves.length === this.attackCandidates.length){
-          var target = Array.from(new Set(this.attackCandidates))
-          if (target.length === 1){
-            this.players.forEach(player => {
-              if( player.id === id){
-                player.status = "dead"
-                this.attackCandidates = []
-          }
-        });
+      this.attackCandidates.push(id);
+
+      if (this.aliveWerewolves.length === this.attackCandidates.length) {
+        var target = Array.from(new Set(this.attackCandidates));
+        if (target.length === 1) {
+          this.players.forEach((player) => {
+            if (player.id === id) {
+              player.status = "dead";
+              this.attackCandidates = [];
+            }
+          });
+        }
+      }
+    },
+    check(id) {
+      alert("passed to Game.vue " + id);
+      this.players.forEach((player) => {
+        if (player.id === id) {
+          if (player.role === "Werewolf") {
+            alert(player.name + " is Werewolf");
+          } else {
+            alert(player.name + " is NOT Werewolf");
           }
         }
-      },
-      startGame() {
-        this.gameState = "noon"
-      },
-      changeGameState() {
-        this.gameState === "noon" ? this.gameState = "night" : this.gameState = "noon"
-      }
-    }
-}
+      });
+    },
+    startGame() {
+      this.gameState = "noon";
+    },
+    changeGameState() {
+      this.gameState === "noon"
+        ? (this.gameState = "night")
+        : (this.gameState = "noon");
+    },
+  },
+};
 
 function getRandomRole() {
-  var roles = [
-    "Citizen",
-    "FortuneTeller",
-    "Knight",
-    "Madman",
-    "Werewolf"
-  ]
-  var index = Math.floor(Math.random() * roles.length)
+  var roles = ["Citizen", "FortuneTeller", "Knight", "Madman", "Werewolf"];
+  var index = Math.floor(Math.random() * roles.length);
 
   return roles[index];
 }
@@ -115,5 +119,4 @@ function getRandomRole() {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
 </style>
