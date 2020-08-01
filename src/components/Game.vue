@@ -1,7 +1,7 @@
 <template>
   <div class="game">
     <AddPlayer v-on:add-player="addPlayer" />
-    <Board :players="players" :gameState="gameState" @attack="attack" />
+    <Board :players="players" :gameState="gameState" @attack="attack" @check="check" />
     <button v-on:click="assignRoles">Assign Roles</button>
     <div v-if="this.gameState === 'preparation'">
       <button v-on:click="startGame">ゲームを開始</button>

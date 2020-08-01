@@ -1,11 +1,16 @@
 <template>
-  <div>
+  <div v-if="this.gameState === 'night'">
     {{ title }}
     <br />
     <br />占う
     <li v-for="target in validTargets" :key="target.id">
       <input type="submit" :value="target.name" class="btn" @click="check(target.id)" />
     </li>
+  </div>
+  <div v-else>
+    {{ title }}
+    <br />
+    <br />
   </div>
 </template>
 
@@ -19,6 +24,7 @@ export default {
   },
   props: {
     validTargets: Array,
+    gameState: String,
   },
   methods: {
     check(id) {
