@@ -6,10 +6,10 @@
         <Citizen></Citizen>
       </p>
       <p v-else-if="this.role === 'FortuneTeller'">
-        <FortuneTeller :validTargets="alivePlayers" @check="check"></FortuneTeller>
+        <FortuneTeller :gameState="gameState" :validTargets="alivePlayers" @check="check"></FortuneTeller>
       </p>
       <p v-else-if="this.role === 'Knight'">
-        <Knight :validTargets="alivePlayers" @protect="protect"></Knight>
+        <Knight :gameState="gameState" :validTargets="alivePlayers" @protect="protect"></Knight>
       </p>
       <p v-else-if="this.role === 'Madman'">
         <Madman></Madman>
@@ -64,8 +64,8 @@ export default {
       this.$emit("attack", id);
     },
     protect(id) {
-      alert("message from plauyer.vue " +id + " triggered from werewolf.vue");
-      this.$emit("protect", id)
+      alert("message from plauyer.vue " + id + " triggered from werewolf.vue");
+      this.$emit("protect", id);
     },
     check(id) {
       alert(
