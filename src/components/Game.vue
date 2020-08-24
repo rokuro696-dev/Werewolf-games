@@ -78,7 +78,11 @@ export default {
         var target = Array.from(new Set(this.attackCandidates));
         if (target.length === 1) {
           this.players.forEach((player) => {
-            if (player.id === id) {
+            if (player.status === "protected"){
+              player.status = "alive";
+              this.attackCandidate = [];
+            }
+            else if (player.id === id) {
               player.status = "dead";
               this.attackCandidates = [];
             }
