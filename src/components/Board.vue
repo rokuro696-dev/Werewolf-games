@@ -4,6 +4,7 @@
       v-for="player in players"
       :key="player.id"
       :id="player.id"
+      :yourId="id"
       :name="player.name"
       :role="player.role"
       :status="player.status"
@@ -27,13 +28,14 @@ export default {
   props: {
     players: Array,
     gameState: String,
+    id: String,
   },
   methods: {
     attack(id) {
       this.$emit("attack", id);
     },
     protect(id) {
-        this.$emit("protect", id);
+      this.$emit("protect", id);
     },
     check(id) {
       this.$emit("check", id);
@@ -42,5 +44,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

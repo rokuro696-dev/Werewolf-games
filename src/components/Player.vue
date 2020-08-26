@@ -6,16 +6,30 @@
         <Citizen></Citizen>
       </p>
       <p v-else-if="this.role === 'FortuneTeller'">
-        <FortuneTeller :gameState="gameState" :validTargets="alivePlayers" @check="check"></FortuneTeller>
+        <FortuneTeller
+          :id="id"
+          :yourId="yourId"
+          :gameState="gameState"
+          :validTargets="alivePlayers"
+          @check="check"
+        ></FortuneTeller>
       </p>
       <p v-else-if="this.role === 'Knight'">
-        <Knight :gameState="gameState" :validTargets="alivePlayers" @protect="protect"></Knight>
+        <Knight
+          :gameState="gameState"
+          :validTargets="alivePlayers"
+          @protect="protect"
+        ></Knight>
       </p>
       <p v-else-if="this.role === 'Madman'">
         <Madman></Madman>
       </p>
       <p v-else-if="this.role === 'Werewolf'">
-        <Werewolf :gameState="gameState" :validTargets="alivePlayers" @attack="attack"></Werewolf>
+        <Werewolf
+          :gameState="gameState"
+          :validTargets="alivePlayers"
+          @attack="attack"
+        ></Werewolf>
       </p>
       <p v-else>役職を決めてください。</p>
     </div>
@@ -41,6 +55,7 @@ export default {
   },
   props: {
     id: String,
+    yourId: String,
     name: String,
     role: String,
     status: String,
@@ -48,7 +63,7 @@ export default {
     gameState: String,
   },
   computed: {
-    alivePlayers: function () {
+    alivePlayers: function() {
       var alivePlayers = [];
       this.otherPlayers.forEach((player) => {
         if (player.status === "alive" && player.name !== this.name) {
@@ -77,5 +92,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

@@ -1,18 +1,45 @@
 <template>
   <div id="app">
-    <Game gameState="preparation"/>
+    <div div v-if="this.roomName === ''">
+      <Entrance v-on:enter-room="enterRoom" />
+    </div>
+    <div v-else>
+      <Game
+        :roomName="this.roomName"
+        :playerName="this.playerName"
+        :id="this.id"
+      />
+    </div>
   </div>
 </template>
 
 <script>
-import Game from './components/Game.vue'
+import Entrance from "./components/Entrance.vue";
+import Game from "./components/Game.vue";
+import { v4 as uuid } from "uuid";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    Game
-  }
-}
+    Game,
+    Entrance,
+  },
+  data() {
+    return {
+      id: "",
+      roomName: "",
+      playerName: "",
+      socketID: "",
+    };
+  },
+  methods: {
+    enterRoom(data) {
+      this.id = uuid();
+      this.roomName = data.roomName;
+      this.playerName = data.playerName;
+    },
+  },
+};
 </script>
 
 <style>

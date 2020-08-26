@@ -1,10 +1,15 @@
 <template>
-  <div v-if="this.gameState === 'night'">
+  <div v-if="this.gameState === 'night' && id === yourId">
     {{ title }}
     <br />
     <br />占う
     <li v-for="target in validTargets" :key="target.id">
-      <input type="submit" :value="target.name" class="btn" @click="check(target.id)" />
+      <input
+        type="submit"
+        :value="target.name"
+        class="btn"
+        @click="check(target.id)"
+      />
     </li>
   </div>
   <div v-else>
@@ -23,17 +28,18 @@ export default {
     };
   },
   props: {
+    id: String,
+    yourId: String,
     validTargets: Array,
     gameState: String,
+    type: String,
   },
   methods: {
     check(id) {
-      alert("clicked on " + id + " from fortuneteller.vue");
       this.$emit("check", id);
     },
   },
 };
 </script>
 
-<style>
-</style>
+<style></style>
