@@ -1,5 +1,5 @@
 <template>
-  <div v-if="this.gameState === 'night'">
+  <div v-if="this.gameState === 'night' && status === 'alive'">
     {{ title }}
     <br />
     <br />占う
@@ -24,6 +24,7 @@ export default {
   },
   props: {
     validTargets: Array,
+    status: String,
     gameState: String,
   },
   methods: {

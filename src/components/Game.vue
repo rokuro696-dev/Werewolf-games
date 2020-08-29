@@ -1,7 +1,14 @@
 <template>
   <div class="game">
     <AddPlayer v-on:add-player="addPlayer" />
-    <Board :players="players" :gameState="gameState" @attack="attack" @protect="protect" @check="check" />
+    <Board
+      :players="players"
+      :gameState="gameState"
+      @attack="attack"
+      @protect="protect"
+      @check="check"
+      @vote="vote"
+    />
     <button v-on:click="assignRoles">Assign Roles</button>
     <div v-if="this.gameState === 'preparation'">
       <button v-on:click="startGame">ゲームを開始</button>
@@ -47,8 +54,30 @@ export default {
           role: "",
           status: "alive",
         },
+        {
+          id: "4",
+          name: "Shiro",
+          role: "",
+          status: "alive",
+        },
+        {
+          id: "5",
+          name: "Goro",
+          role: "",
+          status: "alive",
+        },
       ],
+
       attackCandidates: [],
+
+      voteCandidates: [
+        { id: "0", vote: 0 }, //集計用
+        { id: "1", vote: 0 },
+        { id: "2", vote: 0 },
+        { id: "3", vote: 0 },
+        { id: "4", vote: 0 },
+        { id: "5", vote: 0 },
+      ],
     };
   },
   computed: {
@@ -61,6 +90,15 @@ export default {
       });
       return aliveWerewolves;
     },
+    alivePlayers: function () {
+      var alivePlayers = [];
+      this.players.forEach((player) => {
+        if (player.status === "alive" && player.name !== this.name) {
+          alivePlayers.push(player);
+        }
+      });
+      return alivePlayers;
+    },
   },
   methods: {
     addPlayer(newPlayer) {
@@ -69,20 +107,51 @@ export default {
     assignRoles: function () {
       this.players.forEach((player) => (player.role = getRandomRole()));
     },
+    vote(id) {
+      alert("Vote: passed to Game.vue " + id);
+      //票数集計
+      this.voteCandidates[0].vote = this.voteCandidates[0].vote + 1;
+      //対象に投票
+      this.voteCandidates[id].vote = this.voteCandidates[id].vote + 1;
+
+      alert(
+        "vote check:\n" +
+          "PlayerID:" +
+          this.voteCandidates[id].id +
+          "-" +
+          this.voteCandidates[id].vote
+      );
+      //票が集まったらソート
+      if (this.alivePlayers.length === this.voteCandidates[0].vote) {
+        this.voteCandidates.sort(function (a, b) {
+          if (a.vote < b.value) return 1;
+          if (a.vote > b.vote) return -1;
+          return 0;
+        });
+        //処刑
+        alert("Execution:" + this.voteCandidates[1].id);
+        this.players.forEach((player) => {
+          if (player.id === this.voteCandidates[1].id) {
+            player.status = "dead";
+            this.voteCandidates = [];
+          }
+        });
+
+        this.voteCandidates.forEach((voteCandidate) => {
+          voteCandidate.vote = 0;
+        });
+      }
+    },
+
     attack(id) {
       alert("passed to Game.vue " + id);
 
       this.attackCandidates.push(id);
-
       if (this.aliveWerewolves.length === this.attackCandidates.length) {
         var target = Array.from(new Set(this.attackCandidates));
         if (target.length === 1) {
           this.players.forEach((player) => {
-            if (player.status === "protected"){
-              player.status = "alive";
-              this.attackCandidate = [];
-            }
-            else if (player.id === id) {
+            if (player.id === id) {
               player.status = "dead";
               this.attackCandidates = [];
             }
@@ -90,18 +159,18 @@ export default {
         }
       }
     },
-    protect(id){
-      alert("passed to Game.vue " + id)
+    protect(id) {
+      alert("passed to Game.vue " + id);
 
-      this.protectCandidates.push(id)
+      this.protectCandidates.push(id);
 
-      if(this.aliveWerewolves.length === this.protectedCandidates.length){
-        var target = Array.from(new Set(this.protectedCandidates))
-        if (target.length ===1){
+      if (this.aliveWerewolves.length === this.protectedCandidates.length) {
+        var target = Array.from(new Set(this.protectedCandidates));
+        if (target.length === 1) {
           this.players.forEach((player) => {
-            if( player.id === id){
+            if (player.id === id) {
               player.status = "protected";
-              this.protectCandidates =[];
+              this.protectCandidates = [];
             }
           });
         }

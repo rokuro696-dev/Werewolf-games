@@ -12,6 +12,7 @@
       @attack="attack"
       @protect="protect"
       @check="check"
+      @vote="vote"
     ></Player>
   </div>
 </template>
@@ -32,11 +33,14 @@ export default {
     attack(id) {
       this.$emit("attack", id);
     },
-    protect(id) {
-        this.$emit("protect", id);
+    protected(id) {
+      this.$emit("protect", id);
     },
     check(id) {
       this.$emit("check", id);
+    },
+    vote(id) {
+      this.$emit("vote", id);
     },
   },
 };

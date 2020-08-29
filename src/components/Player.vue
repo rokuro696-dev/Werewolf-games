@@ -18,6 +18,12 @@
         <Werewolf :gameState="gameState" :validTargets="alivePlayers" @attack="attack"></Werewolf>
       </p>
       <p v-else>役職を決めてください。</p>
+      <div v-if="gameState === 'noon' && status === 'alive'">
+        投票する
+        <li v-for="target in alivePlayers" :key="target.id">
+          <input type="submit" :value="target.name" class="btn" @click="vote(target.id)" />
+        </li>
+      </div>
     </div>
     {{ status }}
   </button>
@@ -72,6 +78,10 @@ export default {
         "message from player.vue " + id + " triggered from FortuneTeller.vue"
       );
       this.$emit("check", id);
+    },
+    vote(id) {
+      alert("clicked on " + id + " from Player.vue");
+      this.$emit("vote", id);
     },
   },
 };
