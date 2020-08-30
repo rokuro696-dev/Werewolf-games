@@ -66,6 +66,57 @@ export default {
           role: "",
           status: "alive",
         },
+        {
+          id: "6",
+          name: "Anna",
+          role: "",
+          status: "alive",
+        },{
+          id: "7",
+          name: "John",
+          role: "",
+          status: "alive",
+        },{
+          id: "8",
+          name: "Mia",
+          role: "",
+          status: "alive",
+        },{
+          id: "9",
+          name: "Luke",
+          role: "",
+          status: "alive",
+        },{
+          id: "10",
+          name: "Emma",
+          role: "",
+          status: "alive",
+        },{
+          id: "11",
+          name: "Ryan",
+          role: "",
+          status: "alive",
+        },{
+          id: "12",
+          name: "Melissa",
+          role: "",
+          status: "alive",
+        },{
+          id: "13",
+          name: "Elijah",
+          role: "",
+          status: "alive",
+        },{
+          id: "14",
+          name: "Liam",
+          role: "",
+          status: "alive",
+        },{
+          id: "15",
+          name: "Olivia",
+          role: "",
+          status: "alive",
+        },
       ],
 
       attackCandidates: [],
@@ -144,38 +195,38 @@ export default {
     },
 
     attack(id) {
-      alert("passed to Game.vue " + id);
-
+      alert("passed to Game.vue" + id);
       this.attackCandidates.push(id);
-      if (this.aliveWerewolves.length === this.attackCandidates.length) {
+      if (this.alivewerewolves.length === this.attackCandidates.length) {
         var target = Array.from(new Set(this.attackCandidates));
-        if (target.length === 1) {
+        if (target.length === 1 ) {
           this.players.forEach((player) => {
-            if (player.id === id) {
+            if (player.status === "protected") {
+              player.status = "alive";
+              this.attackCandidates = [];
+            }
+            else if (player.id === id) {
               player.status = "dead";
               this.attackCandidates = [];
             }
-          });
+          })
         }
       }
     },
+
     protect(id) {
-      alert("passed to Game.vue " + id);
+      alert("passed to Game.vue" + id)
 
-      this.protectCandidates.push(id);
+      this.players.forEach((player) => {
+        console.log (player.id)
+        console.log (id)
 
-      if (this.aliveWerewolves.length === this.protectedCandidates.length) {
-        var target = Array.from(new Set(this.protectedCandidates));
-        if (target.length === 1) {
-          this.players.forEach((player) => {
-            if (player.id === id) {
-              player.status = "protected";
-              this.protectCandidates = [];
-            }
-          });
+        if (player.id === id){
+          player.status = "protected";
         }
-      }
+      })
     },
+
     check(id) {
       alert("passed to Game.vue " + id);
       this.players.forEach((player) => {

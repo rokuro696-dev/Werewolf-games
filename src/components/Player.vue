@@ -57,7 +57,7 @@ export default {
     alivePlayers: function () {
       var alivePlayers = [];
       this.otherPlayers.forEach((player) => {
-        if (player.status === "alive" && player.name !== this.name) {
+        if ((player.status === "alive" || player.status === "protected") && player.name !== this.name) {
           alivePlayers.push(player);
         }
       });

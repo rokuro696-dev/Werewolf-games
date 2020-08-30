@@ -33,7 +33,7 @@ export default {
     attack(id) {
       this.$emit("attack", id);
     },
-    protected(id) {
+    protect(id) {
       this.$emit("protect", id);
     },
     check(id) {
