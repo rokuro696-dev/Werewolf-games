@@ -32,7 +32,6 @@ export default {
     yourId: String,
     validTargets: Array,
     gameState: String,
-    type: String,
   },
   methods: {
     check(id) {

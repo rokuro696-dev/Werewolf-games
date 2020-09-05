@@ -4,11 +4,7 @@
       <Entrance v-on:enter-room="enterRoom" />
     </div>
     <div v-else>
-      <Game
-        :roomName="this.roomName"
-        :playerName="this.playerName"
-        :id="this.id"
-      />
+      <Game :roomName="this.roomName" :playerName="this.playerName" :id="this.id" />
     </div>
   </div>
 </template>

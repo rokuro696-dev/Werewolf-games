@@ -17,6 +17,7 @@
       <p v-else-if="this.role === 'Knight'">
         <Knight
           :gameState="gameState"
+          :yourId="yourId"
           :validTargets="alivePlayers"
           @protect="protect"
         ></Knight>
@@ -26,8 +27,12 @@
       </p>
       <p v-else-if="this.role === 'Werewolf'">
         <Werewolf
+          :id="id"
+          :yourId="yourId"
           :gameState="gameState"
-          :validTargets="alivePlayers"
+          :validTargets="attackablePlayers"
+          :attacked="attacked"
+          ref="WerewolfComponent"
           @attack="attack"
         ></Werewolf>
       </p>
@@ -62,8 +67,13 @@ export default {
     otherPlayers: Array,
     gameState: String,
   },
+  data() {
+    return {
+      attacked: false,
+    };
+  },
   computed: {
-    alivePlayers: function() {
+    alivePlayers: function () {
       var alivePlayers = [];
       this.otherPlayers.forEach((player) => {
         if (player.status === "alive" && player.name !== this.name) {
@@ -72,11 +82,21 @@ export default {
       });
       return alivePlayers;
     },
+    attackablePlayers: function () {
+      var attackablePlayers = [];
+      this.alivePlayers.forEach((player) => {
+        if (player.role !== "Werewolf") attackablePlayers.push(player);
+      });
+      return attackablePlayers;
+    },
   },
   methods: {
-    attack(id) {
-      alert("message from player.vue " + id + " triggered from werewolf.vue");
-      this.$emit("attack", id);
+    attack(data) {
+      let id = data.id;
+      let yourId = data.yourId;
+      this.attacked = true;
+      // Boardの"attack"メソッド発火
+      this.$emit("attack", { id, yourId });
     },
     protect(id) {
       alert("message from plauyer.vue " + id + " triggered from werewolf.vue");
@@ -87,6 +107,10 @@ export default {
         "message from player.vue " + id + " triggered from FortuneTeller.vue"
       );
       this.$emit("check", id);
+    },
+    clearAttackedStatus() {
+      this.attacked = false;
+      this.$refs.WerewolfComponent.attackTarget = "";
     },
   },
 };

@@ -62,5 +62,28 @@ io.on("connection", (socket) => {
         .to(data.roomName)
         .broadcast.emit("GAMESTATE-CHANGED", data.gameState);
     });
+
+    // 襲撃
+    socket.on("WEREWOLF-ATTACK", function(data) {
+      let targetId = data.targetId;
+      let wolfId = data.wolfId;
+      socket
+        .to(data.roomName)
+        .broadcast.emit("WEREWOLF-ATTACKED", { targetId, wolfId });
+    });
+
+    // 襲撃結果
+    socket.on("ATTACK-RESULT", function(data) {
+      let targetId = data.targetId;
+      let wolfId = data.wolfId;
+      socket
+        .to(data.roomName)
+        .broadcast.emit("ATTACK-RESULT", { targetId, wolfId });
+    });
+
+    // 襲撃再投票
+    socket.on("WEREWOLF-REVOTE", function(data) {
+      socket.to(data.roomName).broadcast.emit("WEREWOLF-REVOTE");
+    });
   });
 });

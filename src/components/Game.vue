@@ -4,6 +4,7 @@
       :players="players"
       :gameState="gameState"
       :id="id"
+      ref="BoardComponent"
       @attack="attack"
       @protect="protect"
       @check="check"
@@ -45,11 +46,10 @@ export default {
         name: String (プレイヤー名)
         role: String (役職、デフォルトは空文字)
         status: String (ゲーム上でのステータス)
-        type: String (プレイヤーが"あなた"か他の人か)
         */
       ],
-      type: "you",
       attackCandidates: [],
+      attackers: [],
     };
   },
   // 入室処理全般
@@ -68,24 +68,15 @@ export default {
     let playerIndex = this.players.findIndex(
       (player) => player.name === this.playerName
     );
-    if (!playerIndex > -1) {
-      // 含まれていなければ"自分"を自身のプレイヤーリストに追加
-      const you = {
+    // 含まれていなければ"自分"を自身のプレイヤーリストに追加
+    if (playerIndex === -1) {
+      const self = {
         id: this.id,
         name: this.playerName,
         role: "",
         status: "alive",
-        type: "you",
       };
-      this.addPlayer(you);
-    } else {
-      // 含まれていれば、typeを"you"に変更し、他のプレイヤーは"other"に変更
-      this.players.forEach((player) => {
-        if (player.name === this.playerName) {
-          player.type = "you";
-          player.id = this.id;
-        } else player.type = "other";
-      });
+      this.addPlayer(self);
     }
     // ゲーム状態を取得
     this.socket.on("PASS-GAMESTATE", (data) => {
@@ -93,6 +84,7 @@ export default {
     });
   },
   mounted() {
+    // 他プレイヤー入場時処理
     this.socket.on("USER-ENTERED", (data) => {
       if (!this.players.some((player) => player.name === data.playerName)) {
         const newPlayer = {
@@ -127,9 +119,67 @@ export default {
     this.socket.on("GAMESTATE-CHANGED", (gameState) => {
       this.gameState = gameState;
     });
+
+    // 襲撃（人狼間での襲撃対象精査）
+    this.socket.on("WEREWOLF-ATTACKED", (data) => {
+      let roomName = this.roomName;
+      let targetId = data.targetId;
+      let wolfId = data.wolfId;
+
+      if (this.yourRole === "Werewolf" && this.id !== wolfId) {
+        // 襲撃対象の配列に襲撃対象のIDを格納
+        this.attackCandidates = [...this.attackCandidates, targetId];
+        // 襲撃者を配列に格納
+        this.attackers = [...this.attackers, wolfId];
+
+        if (this.aliveWerewolves.length === this.attackCandidates.length) {
+          if (this.isAttackUnanimous()) {
+            var target = Array.from(new Set(this.attackCandidates));
+            this.processAttack(target);
+          } else {
+            this.attackCandidates = [];
+            this.attackers = [];
+            alert("Revote");
+            this.$refs.BoardComponent.clearAttackedStatus();
+            this.socket.emit("WEREWOLF-REVOTE", roomName);
+          }
+        }
+      }
+    });
+
+    // 襲撃結果
+    this.socket.on("ATTACK-RESULT", (data) => {
+      let targetId = data.targetId;
+      //let wolfId = data.wolfId;
+      //let isSuccess = data.isSuccess;
+      if (data.wolfId !== this.id) {
+        this.players.forEach((player) => {
+          if (player.status === "protected") {
+            player.status = "alive";
+
+            // デバッグ用アラート
+            if (this.yourRole === "Werewolf") alert("襲撃失敗");
+          } else if (player.id === targetId) {
+            player.status = "dead";
+            // デバッグ用アラート
+            if (this.yourRole === "Werewolf") alert("襲撃成功");
+          }
+        });
+      }
+      this.attackCandidate = [];
+      this.attackers = [];
+    });
+
+    // 襲撃再投票
+    this.socket.on("WEREWOLF-REVOTE", () => {
+      this.attackCandidates = [];
+      this.attackers = [];
+      alert("Revote");
+      this.$refs.BoardComponent.clearAttackedStatus();
+    });
   },
   computed: {
-    aliveWerewolves: function() {
+    aliveWerewolves: function () {
       var aliveWerewolves = [];
       this.players.forEach((player) => {
         if (player.status === "alive" && player.role === "Werewolf") {
@@ -138,37 +188,54 @@ export default {
       });
       return aliveWerewolves;
     },
+    yourRole: function () {
+      var yourRole = "";
+      var you = this.players.find((player) => player.id === this.id);
+      yourRole = you.role;
+      return yourRole;
+    },
   },
   methods: {
     addPlayer(newPlayer) {
       this.players = [...this.players, newPlayer];
     },
-    assignRoles: function() {
+    assignRoles: function () {
       this.players.forEach((player) => (player.role = getRandomRole()));
       const players = this.players;
       const roomName = this.roomName;
       this.socket.emit("ASSIGN-ROLES", { roomName, players });
     },
-    attack(id) {
-      alert("passed to Game.vue " + id);
+    attack(data) {
+      let roomName = this.roomName;
+      let targetId = data.id;
+      let wolfId = data.yourId;
 
-      this.attackCandidates.push(id);
+      // 襲撃対象の配列に襲撃対象のIDを格納
+      this.attackCandidates = [...this.attackCandidates, targetId];
+      // 襲撃者を配列に格納
+      this.attackers = [...this.attackers, wolfId];
 
       if (this.aliveWerewolves.length === this.attackCandidates.length) {
-        var target = Array.from(new Set(this.attackCandidates));
-        if (target.length === 1) {
-          this.players.forEach((player) => {
-            if (player.status === "protected") {
-              player.status = "alive";
-              this.attackCandidate = [];
-            } else if (player.id === id) {
-              player.status = "dead";
-              this.attackCandidates = [];
-            }
-          });
+        if (this.isAttackUnanimous()) {
+          var target = Array.from(new Set(this.attackCandidates))[0];
+          this.processAttack(target);
+        } else {
+          this.attackCandidates = [];
+          this.attackers = [];
+          alert("Revote");
+          this.$refs.BoardComponent.clearAttackedStatus();
+          this.socket.emit("WEREWOLF-REVOTE", { roomName });
         }
+      } else {
+        // 他の人狼へ襲撃を知らせる。
+        this.socket.emit("WEREWOLF-ATTACK", {
+          roomName,
+          targetId,
+          wolfId,
+        });
       }
     },
+
     protect(id) {
       //alert("passed to Game.vue " + id);
 
@@ -213,11 +280,43 @@ export default {
       const gameState = this.gameState;
       this.socket.emit("CHANGE-GAMESTATE", { roomName, gameState });
     },
+    processAttack(targetId) {
+      //let isSuccess = false;
+      this.players.forEach((player) => {
+        if (player.status === "protected") {
+          player.status = "alive";
+          alert("襲撃失敗");
+        } else if (player.id === targetId) {
+          player.status = "dead";
+          //isSuccess = true;
+          alert("襲撃成功");
+        }
+      });
+      this.attackCandidate = [];
+      this.attackers = [];
+
+      let roomName = this.roomName;
+      let wolfId = this.id;
+      this.socket.emit("ATTACK-RESULT", {
+        roomName,
+        targetId,
+        wolfId,
+        //isSuccess,
+      });
+    },
+    isAttackUnanimous() {
+      // 襲撃対象配列の重複排除
+      var target = Array.from(new Set(this.attackCandidates));
+
+      // 重複排除後の配列に要素が一つしか無ければ、襲撃対象が一致
+      return target.length === 1;
+    },
   },
 };
 
 function getRandomRole() {
-  var roles = ["Citizen", "FortuneTeller", "Knight", "Madman", "Werewolf"];
+  var roles = ["Citizen", "Werewolf"];
+  //"FortuneTeller", "Knight", "Madman",
   var index = Math.floor(Math.random() * roles.length);
 
   return roles[index];

@@ -10,6 +10,7 @@
       :status="player.status"
       :otherPlayers="players"
       :gameState="gameState"
+      ref="PlayerComponent"
       @attack="attack"
       @protect="protect"
       @check="check"
@@ -31,14 +32,24 @@ export default {
     id: String,
   },
   methods: {
-    attack(id) {
-      this.$emit("attack", id);
+    attack(data) {
+      let id = data.id;
+      let yourId = data.yourId;
+      // Gameの"attack"発火
+      this.$emit("attack", { id, yourId });
     },
     protect(id) {
       this.$emit("protect", id);
     },
     check(id) {
       this.$emit("check", id);
+    },
+    clearAttackedStatus() {
+      this.$refs.PlayerComponent.forEach((playerComponent) => {
+        if (playerComponent.role === "Werewolf") {
+          playerComponent.clearAttackedStatus();
+        }
+      });
     },
   },
 };
