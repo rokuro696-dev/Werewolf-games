@@ -14,6 +14,7 @@
       @attack="attack"
       @protect="protect"
       @check="check"
+      @vote="vote"
     ></Player>
   </div>
 </template>
@@ -50,6 +51,9 @@ export default {
           playerComponent.clearAttackedStatus();
         }
       });
+    },
+    vote(id) {
+      this.$emit("vote", id);
     },
   },
 };

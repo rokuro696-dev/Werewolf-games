@@ -37,6 +37,17 @@
         ></Werewolf>
       </p>
       <p v-else>役職を決めてください。</p>
+      <div v-if="gameState === 'noon' && status === 'alive'">
+        投票する
+        <li v-for="target in alivePlayers" :key="target.id">
+          <input
+            type="submit"
+            :value="target.name"
+            class="btn"
+            @click="vote(target.id)"
+          />
+        </li>
+      </div>
     </div>
     {{ status }}
   </button>
@@ -73,16 +84,19 @@ export default {
     };
   },
   computed: {
-    alivePlayers: function () {
+    alivePlayers: function() {
       var alivePlayers = [];
       this.otherPlayers.forEach((player) => {
-        if (player.status === "alive" && player.name !== this.name) {
+        if (
+          (player.status === "alive" || player.status === "protected") &&
+          player.name !== this.name
+        ) {
           alivePlayers.push(player);
         }
       });
       return alivePlayers;
     },
-    attackablePlayers: function () {
+    attackablePlayers: function() {
       var attackablePlayers = [];
       this.alivePlayers.forEach((player) => {
         if (player.role !== "Werewolf") attackablePlayers.push(player);
@@ -111,6 +125,10 @@ export default {
     clearAttackedStatus() {
       this.attacked = false;
       this.$refs.WerewolfComponent.attackTarget = "";
+    },
+    vote(id) {
+      alert("clicked on " + id + " from Player.vue");
+      this.$emit("vote", id);
     },
   },
 };

@@ -3,7 +3,9 @@
     {{ title }}
     <br />
     <br />
-    <div v-if="attacked === false || (attacked === true && attackTarget === '')">
+    <div
+      v-if="attacked === false || (attacked === true && attackTarget === '')"
+    >
       襲撃する
       <li v-for="target in validTargets" :key="target.id">
         <input

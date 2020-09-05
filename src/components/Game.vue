@@ -8,6 +8,7 @@
       @attack="attack"
       @protect="protect"
       @check="check"
+      @vote="vote"
     />
     <div v-if="this.gameState === 'preparation'">
       <button button v-on:click="assignRoles">Assign Roles</button>
@@ -48,8 +49,18 @@ export default {
         status: String (ゲーム上でのステータス)
         */
       ],
+
       attackCandidates: [],
       attackers: [],
+
+      voteCandidates: [
+        { id: "0", vote: 0 }, //集計用
+        { id: "1", vote: 0 },
+        { id: "2", vote: 0 },
+        { id: "3", vote: 0 },
+        { id: "4", vote: 0 },
+        { id: "5", vote: 0 },
+      ],
     };
   },
   // 入室処理全般
@@ -179,7 +190,7 @@ export default {
     });
   },
   computed: {
-    aliveWerewolves: function () {
+    aliveWerewolves: function() {
       var aliveWerewolves = [];
       this.players.forEach((player) => {
         if (player.status === "alive" && player.role === "Werewolf") {
@@ -188,23 +199,68 @@ export default {
       });
       return aliveWerewolves;
     },
-    yourRole: function () {
+    yourRole: function() {
       var yourRole = "";
       var you = this.players.find((player) => player.id === this.id);
       yourRole = you.role;
       return yourRole;
+    },
+    alivePlayers: function() {
+      var alivePlayers = [];
+      this.players.forEach((player) => {
+        if (player.status === "alive" && player.name !== this.name) {
+          alivePlayers.push(player);
+        }
+      });
+      return alivePlayers;
     },
   },
   methods: {
     addPlayer(newPlayer) {
       this.players = [...this.players, newPlayer];
     },
-    assignRoles: function () {
+    assignRoles: function() {
       this.players.forEach((player) => (player.role = getRandomRole()));
       const players = this.players;
       const roomName = this.roomName;
       this.socket.emit("ASSIGN-ROLES", { roomName, players });
     },
+    vote(id) {
+      alert("Vote: passed to Game.vue " + id);
+      //票数集計
+      this.voteCandidates[0].vote = this.voteCandidates[0].vote + 1;
+      //対象に投票
+      this.voteCandidates[id].vote = this.voteCandidates[id].vote + 1;
+
+      alert(
+        "vote check:\n" +
+          "PlayerID:" +
+          this.voteCandidates[id].id +
+          "-" +
+          this.voteCandidates[id].vote
+      );
+      //票が集まったらソート
+      if (this.alivePlayers.length === this.voteCandidates[0].vote) {
+        this.voteCandidates.sort(function(a, b) {
+          if (a.vote < b.value) return 1;
+          if (a.vote > b.vote) return -1;
+          return 0;
+        });
+        //処刑
+        alert("Execution:" + this.voteCandidates[1].id);
+        this.players.forEach((player) => {
+          if (player.id === this.voteCandidates[1].id) {
+            player.status = "dead";
+            this.voteCandidates = [];
+          }
+        });
+
+        this.voteCandidates.forEach((voteCandidate) => {
+          voteCandidate.vote = 0;
+        });
+      }
+    },
+
     attack(data) {
       let roomName = this.roomName;
       let targetId = data.id;
@@ -237,22 +293,18 @@ export default {
     },
 
     protect(id) {
-      //alert("passed to Game.vue " + id);
+      alert("passed to Game.vue" + id);
 
-      this.protectCandidates.push(id);
+      this.players.forEach((player) => {
+        console.log(player.id);
+        console.log(id);
 
-      if (this.aliveWerewolves.length === this.protectedCandidates.length) {
-        var target = Array.from(new Set(this.protectedCandidates));
-        if (target.length === 1) {
-          this.players.forEach((player) => {
-            if (player.id === id) {
-              player.status = "protected";
-              this.protectCandidates = [];
-            }
-          });
+        if (player.id === id) {
+          player.status = "protected";
         }
-      }
+      });
     },
+
     check(id) {
       //alert("passed to Game.vue " + id);
       this.players.forEach((player) => {

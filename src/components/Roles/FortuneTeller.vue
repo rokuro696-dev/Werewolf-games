@@ -1,5 +1,9 @@
 <template>
+<<<<<<< HEAD
   <div v-if="this.gameState === 'night' && id === yourId">
+=======
+  <div v-if="this.gameState === 'night' && status === 'alive'">
+>>>>>>> development_1
     {{ title }}
     <br />
     <br />占う
@@ -31,6 +35,7 @@ export default {
     id: String,
     yourId: String,
     validTargets: Array,
+    status: String,
     gameState: String,
   },
   methods: {
