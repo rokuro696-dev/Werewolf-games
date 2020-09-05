@@ -221,8 +221,9 @@ export default {
     },
 
     assignRoles: function () {    
+      var roles = []
       if (this.players.length === 15){
-        var roles = [
+        roles = [
           {Title: "Citizen", MaxNum: 7,
           CurrentNum: 0},
           {Title: "Werewolf", MaxNum: 3,
@@ -235,7 +236,19 @@ export default {
           CurrentNum: 0},
           ];
         this.getRandomRole(roles);
+      } else if (this.players.length === 4){
+        roles = [
+          {Title: "Citizen", MaxNum: 2,
+          CurrentNum: 0},
+          {Title: "Werewolf", MaxNum: 2,
+          CurrentNum: 0}
+        ]
+        this.getRandomRole(roles);
       }
+      
+      let roomName = this.roomName;
+      let players = this.players;
+      this.socket.emit("ASSIGN-ROLES", {roomName, players})
     }, 
 
     getRandomRole(roles) {
