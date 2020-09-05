@@ -219,12 +219,40 @@ export default {
     addPlayer(newPlayer) {
       this.players = [...this.players, newPlayer];
     },
-    assignRoles: function() {
-      this.players.forEach((player) => (player.role = getRandomRole()));
-      const players = this.players;
-      const roomName = this.roomName;
-      this.socket.emit("ASSIGN-ROLES", { roomName, players });
+
+    assignRoles: function () {    
+      if (this.players.length === 15){
+        var roles = [
+          {Title: "Citizen", MaxNum: 7,
+          CurrentNum: 0},
+          {Title: "Werewolf", MaxNum: 3,
+          CurrentNum: 0},
+           {Title: "FortuneTeller", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Knight", MaxNum: 2,
+          CurrentNum: 0},
+           {Title: "Madman", MaxNum: 2,
+          CurrentNum: 0},
+          ];
+        this.getRandomRole(roles);
+      }
+    }, 
+
+    getRandomRole(roles) {
+      this.players.forEach((player) => {
+        while(player.role === ""){
+        var index = Math.floor(Math.random() *roles.length);
+        var role = roles[index];
+        console.log (role.MaxNum, role.CurrentNum);
+        if (role.MaxNum > role.CurrentNum){
+          role.CurrentNum += 1;
+          player.role = role.Title
+          }
+        }
+      }
+      )
     },
+
     vote(id) {
       alert("Vote: passed to Game.vue " + id);
       //票数集計
@@ -366,13 +394,6 @@ export default {
   },
 };
 
-function getRandomRole() {
-  var roles = ["Citizen", "Werewolf"];
-  //"FortuneTeller", "Knight", "Madman",
-  var index = Math.floor(Math.random() * roles.length);
-
-  return roles[index];
-}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

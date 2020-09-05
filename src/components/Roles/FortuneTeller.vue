@@ -1,9 +1,6 @@
 <template>
-<<<<<<< HEAD
-  <div v-if="this.gameState === 'night' && id === yourId">
-=======
-  <div v-if="this.gameState === 'night' && status === 'alive'">
->>>>>>> development_1
+  <div v-if="this.gameState === 'night' && id === yourId && status === 'alive'">
+
     {{ title }}
     <br />
     <br />占う
