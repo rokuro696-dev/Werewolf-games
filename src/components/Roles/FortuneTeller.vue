@@ -1,5 +1,5 @@
 <template>
-  <div v-if="this.gameState === 'night' && status === 'alive'">
+  <div v-if="this.gameState === 'night'">
     {{ title }}
     <br />
     <br />占う
