@@ -250,7 +250,7 @@ export default {
           CurrentNum: 0},
            {Title: "Madman", MaxNum: 2,
           CurrentNum: 0},
-        ]
+        ];
         this.getRandomRole(roles);
       } else if (this.players.length === 13){
         roles = [
@@ -264,7 +264,7 @@ export default {
           CurrentNum: 0},
            {Title: "Madman", MaxNum: 2,
           CurrentNum: 0},
-        ]
+        ];
         this.getRandomRole(roles);
       } else if (this.players.length === 12){
         roles = [
@@ -278,7 +278,7 @@ export default {
           CurrentNum: 0},
            {Title: "Madman", MaxNum: 2,
           CurrentNum: 0},
-        ]
+        ];
         this.getRandomRole(roles);
       } else if (this.players.length === 11){
         roles = [
@@ -292,7 +292,7 @@ export default {
           CurrentNum: 0},
            {Title: "Madman", MaxNum: 2,
           CurrentNum: 0},
-        ]
+        ];
         this.getRandomRole(roles);
       } else if (this.players.length === 10){
         roles = [
@@ -306,7 +306,7 @@ export default {
           CurrentNum: 0},
            {Title: "Madman", MaxNum: 2,
           CurrentNum: 0},
-        ]
+        ];
         this.getRandomRole(roles);
       } else if (this.players.length === 9){
         roles = [
@@ -320,7 +320,7 @@ export default {
           CurrentNum: 0},
            {Title: "Madman", MaxNum: 1,
           CurrentNum: 0},
-        ]
+        ];
         this.getRandomRole(roles);
       } else if (this.players.length === 8){
         roles = [
@@ -334,7 +334,7 @@ export default {
           CurrentNum: 0},
            {Title: "Madman", MaxNum: 1,
           CurrentNum: 0},
-        ]
+        ];
         this.getRandomRole(roles);
       } else if (this.players.length === 7){
         roles = [
@@ -348,7 +348,7 @@ export default {
           CurrentNum: 0},
            {Title: "Madman", MaxNum: 1,
           CurrentNum: 0},
-        ]
+        ];
         this.getRandomRole(roles);
       } else if (this.players.length === 6){
         roles = [
@@ -362,7 +362,7 @@ export default {
           CurrentNum: 0},
            {Title: "Madman", MaxNum: 0,
           CurrentNum: 0},
-        ]
+        ];
         this.getRandomRole(roles);
       } else if (this.players.length === 5){
         roles = [
@@ -376,7 +376,7 @@ export default {
           CurrentNum: 0},
            {Title: "Madman", MaxNum: 1,
           CurrentNum: 0},
-        ]
+        ];
         this.getRandomRole(roles);
       } else if (this.players.length === 4){
         roles = [
@@ -390,7 +390,7 @@ export default {
           CurrentNum: 0},
            {Title: "Madman", MaxNum: 1,
           CurrentNum: 0},
-        ]
+        ];
         this.getRandomRole(roles);
       }
       
