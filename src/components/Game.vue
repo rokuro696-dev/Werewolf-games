@@ -222,6 +222,8 @@ export default {
 
     assignRoles: function () {    
       var roles = []
+      
+      //以下でプレイヤー数別のロールアサインパターンを記載
       if (this.players.length === 15){
         roles = [
           {Title: "Citizen", MaxNum: 7,
@@ -236,12 +238,158 @@ export default {
           CurrentNum: 0},
           ];
         this.getRandomRole(roles);
-      } else if (this.players.length === 4){
+      } else if (this.players.length === 14){
+        roles = [
+          {Title: "Citizen", MaxNum: 7,
+          CurrentNum: 0},
+          {Title: "Werewolf", MaxNum: 3,
+          CurrentNum: 0},
+          {Title: "FortuneTeller", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Knight", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Madman", MaxNum: 2,
+          CurrentNum: 0},
+        ]
+        this.getRandomRole(roles);
+      } else if (this.players.length === 13){
+        roles = [
+          {Title: "Citizen", MaxNum: 6,
+          CurrentNum: 0},
+          {Title: "Werewolf", MaxNum: 3,
+          CurrentNum: 0},
+          {Title: "FortuneTeller", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Knight", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Madman", MaxNum: 2,
+          CurrentNum: 0},
+        ]
+        this.getRandomRole(roles);
+      } else if (this.players.length === 12){
+        roles = [
+          {Title: "Citizen", MaxNum: 5,
+          CurrentNum: 0},
+          {Title: "Werewolf", MaxNum: 3,
+          CurrentNum: 0},
+          {Title: "FortuneTeller", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Knight", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Madman", MaxNum: 2,
+          CurrentNum: 0},
+        ]
+        this.getRandomRole(roles);
+      } else if (this.players.length === 11){
+        roles = [
+          {Title: "Citizen", MaxNum: 5,
+          CurrentNum: 0},
+          {Title: "Werewolf", MaxNum: 2,
+          CurrentNum: 0},
+          {Title: "FortuneTeller", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Knight", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Madman", MaxNum: 2,
+          CurrentNum: 0},
+        ]
+        this.getRandomRole(roles);
+      } else if (this.players.length === 10){
+        roles = [
+          {Title: "Citizen", MaxNum: 4,
+          CurrentNum: 0},
+          {Title: "Werewolf", MaxNum: 2,
+          CurrentNum: 0},
+          {Title: "FortuneTeller", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Knight", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Madman", MaxNum: 2,
+          CurrentNum: 0},
+        ]
+        this.getRandomRole(roles);
+      } else if (this.players.length === 9){
+        roles = [
+          {Title: "Citizen", MaxNum: 4,
+          CurrentNum: 0},
+          {Title: "Werewolf", MaxNum: 2,
+          CurrentNum: 0},
+          {Title: "FortuneTeller", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Knight", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Madman", MaxNum: 1,
+          CurrentNum: 0},
+        ]
+        this.getRandomRole(roles);
+      } else if (this.players.length === 8){
+        roles = [
+          {Title: "Citizen", MaxNum: 3,
+          CurrentNum: 0},
+          {Title: "Werewolf", MaxNum: 2,
+          CurrentNum: 0},
+          {Title: "FortuneTeller", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Knight", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Madman", MaxNum: 1,
+          CurrentNum: 0},
+        ]
+        this.getRandomRole(roles);
+      } else if (this.players.length === 7){
         roles = [
           {Title: "Citizen", MaxNum: 2,
           CurrentNum: 0},
           {Title: "Werewolf", MaxNum: 2,
-          CurrentNum: 0}
+          CurrentNum: 0},
+          {Title: "FortuneTeller", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Knight", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Madman", MaxNum: 1,
+          CurrentNum: 0},
+        ]
+        this.getRandomRole(roles);
+      } else if (this.players.length === 6){
+        roles = [
+          {Title: "Citizen", MaxNum: 2,
+          CurrentNum: 0},
+          {Title: "Werewolf", MaxNum: 2,
+          CurrentNum: 0},
+          {Title: "FortuneTeller", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Knight", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Madman", MaxNum: 0,
+          CurrentNum: 0},
+        ]
+        this.getRandomRole(roles);
+      } else if (this.players.length === 5){
+        roles = [
+          {Title: "Citizen", MaxNum: 2,
+          CurrentNum: 0},
+          {Title: "Werewolf", MaxNum: 1,
+          CurrentNum: 0},
+          {Title: "FortuneTeller", MaxNum: 0,
+          CurrentNum: 0},
+           {Title: "Knight", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Madman", MaxNum: 1,
+          CurrentNum: 0},
+        ]
+        this.getRandomRole(roles);
+      } else if (this.players.length === 4){
+        roles = [
+          {Title: "Citizen", MaxNum: 1,
+          CurrentNum: 0},
+          {Title: "Werewolf", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "FortuneTeller", MaxNum: 0,
+          CurrentNum: 0},
+           {Title: "Knight", MaxNum: 1,
+          CurrentNum: 0},
+           {Title: "Madman", MaxNum: 1,
+          CurrentNum: 0},
         ]
         this.getRandomRole(roles);
       }
