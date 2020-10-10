@@ -4,6 +4,7 @@
       :players="players"
       :gameState="gameState"
       :id="id"
+      :yourRole="yourRole"
       ref="BoardComponent"
       @attack="attack"
       @protect="protect"
@@ -17,7 +18,7 @@
       <button v-on:click="startGame">ゲームを開始</button>
     </div>
     <div v-else>
-      <button v-on:click="changeGameState">次のターンに進む</button>
+      <a class="nextPage" v-on:click="changeGameState">次のターンに進む</a>
     </div>
     <div>現在は {{ this.gameState }}</div>
   </div>
@@ -507,10 +508,16 @@ export default {
       });
     },
     startGame() {
-      this.gameState = "noon";
+      this.gameState = "reveal";
       const roomName = this.roomName;
       const gameState = this.gameState;
       this.socket.emit("START-GAME", { roomName, gameState });
+    },
+    startNoon() {
+      this.gameState = "noon";
+      const roomName = this.roomName;
+      const gameState = this.gameState;
+      this.socket.emit("CHANGE-GAMESTATE", {roomName, gameState})
     },
     changeGameState() {
       this.gameState === "noon"
