@@ -53,14 +53,8 @@ export default {
       attackCandidates: [],
       attackers: [],
 
-      voteCandidates: [
-        { id: "0", vote: 0 }, //集計用
-        { id: "1", vote: 0 },
-        { id: "2", vote: 0 },
-        { id: "3", vote: 0 },
-        { id: "4", vote: 0 },
-        { id: "5", vote: 0 },
-      ],
+      voteCandidates: [],
+      voters: [],
     };
   },
   // 入室処理全般
@@ -131,6 +125,60 @@ export default {
       this.gameState = gameState;
     });
 
+    // 投票（投票状況をルームに共有）
+    this.socket.on("PLAYER-VOTED", (data) => {
+      console.log(
+        "プレイヤー [" +
+          data.yourId +
+          "] が [" +
+          data.targetId +
+          "] に投票しました。" +
+          this.socket.id
+      );
+      //let roomName = this.roomName;
+      let targetId = data.targetId;
+      let voterId = data.yourId;
+
+      if (this.id !== voterId) {
+        // 処刑対象の配列に処刑対象のIDを格納
+        this.voteCandidates = [...this.voteCandidates, targetId];
+        // 処刑者を配列に格納
+        this.voters = [...this.voters, voterId];
+        //票数確認用本番では消す
+        alert(this.voters.length + "/" + this.alivePlayers.length);
+      }
+    });
+
+    // 投票（投票結果をルームに共有）
+    this.socket.on("EXECUTE-RESULT", (data) => {
+      alert("投票が終了しました");
+      //let roomName = this.roomName;
+      //let targetId = data.targetId;
+      let voterId = data.yourId;
+
+      if (this.id !== voterId) {
+        //処刑フェーズ
+        if (this.alivePlayers.length === this.voters.length) {
+          alert("投票数確認");
+          //票数順にソート
+          this.voteCandidates.sort(function (a, b) {
+            if (a.vote < b.value) return 1;
+            if (a.vote > b.vote) return -1;
+            return 0;
+          });
+          //票数が多いプレイヤーを処刑
+          this.players.forEach((player) => {
+            if (player.id === this.voteCandidates[0]) {
+              player.status = "dead";
+              alert(player.name + "が処刑されました");
+            }
+          });
+          this.voteCandidates = [];
+          this.voters = [];
+        }
+      }
+    });
+
     // 襲撃（人狼間での襲撃対象精査）
     this.socket.on("WEREWOLF-ATTACKED", (data) => {
       let roomName = this.roomName;
@@ -190,7 +238,7 @@ export default {
     });
   },
   computed: {
-    aliveWerewolves: function() {
+    aliveWerewolves: function () {
       var aliveWerewolves = [];
       this.players.forEach((player) => {
         if (player.status === "alive" && player.role === "Werewolf") {
@@ -199,13 +247,13 @@ export default {
       });
       return aliveWerewolves;
     },
-    yourRole: function() {
+    yourRole: function () {
       var yourRole = "";
       var you = this.players.find((player) => player.id === this.id);
       yourRole = you.role;
       return yourRole;
     },
-    alivePlayers: function() {
+    alivePlayers: function () {
       var alivePlayers = [];
       this.players.forEach((player) => {
         if (player.status === "alive" && player.name !== this.name) {
@@ -220,232 +268,181 @@ export default {
       this.players = [...this.players, newPlayer];
     },
 
-    assignRoles: function () {    
-      var roles = []
-      
+    assignRoles: function () {
+      var roles = [];
+
       //以下でプレイヤー数別のロールアサインパターンを記載
-      if (this.players.length === 15){
+      if (this.players.length === 15) {
         roles = [
-          {Title: "Citizen", MaxNum: 7,
-          CurrentNum: 0},
-          {Title: "Werewolf", MaxNum: 3,
-          CurrentNum: 0},
-           {Title: "FortuneTeller", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Knight", MaxNum: 2,
-          CurrentNum: 0},
-           {Title: "Madman", MaxNum: 2,
-          CurrentNum: 0},
-          ];
-        this.getRandomRole(roles);
-      } else if (this.players.length === 14){
-        roles = [
-          {Title: "Citizen", MaxNum: 7,
-          CurrentNum: 0},
-          {Title: "Werewolf", MaxNum: 3,
-          CurrentNum: 0},
-          {Title: "FortuneTeller", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Knight", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Madman", MaxNum: 2,
-          CurrentNum: 0},
+          { Title: "Citizen", MaxNum: 7, CurrentNum: 0 },
+          { Title: "Werewolf", MaxNum: 3, CurrentNum: 0 },
+          { Title: "FortuneTeller", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Knight", MaxNum: 2, CurrentNum: 0 },
+          { Title: "Madman", MaxNum: 2, CurrentNum: 0 },
         ];
         this.getRandomRole(roles);
-      } else if (this.players.length === 13){
+      } else if (this.players.length === 14) {
         roles = [
-          {Title: "Citizen", MaxNum: 6,
-          CurrentNum: 0},
-          {Title: "Werewolf", MaxNum: 3,
-          CurrentNum: 0},
-          {Title: "FortuneTeller", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Knight", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Madman", MaxNum: 2,
-          CurrentNum: 0},
+          { Title: "Citizen", MaxNum: 7, CurrentNum: 0 },
+          { Title: "Werewolf", MaxNum: 3, CurrentNum: 0 },
+          { Title: "FortuneTeller", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Knight", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Madman", MaxNum: 2, CurrentNum: 0 },
         ];
         this.getRandomRole(roles);
-      } else if (this.players.length === 12){
+      } else if (this.players.length === 13) {
         roles = [
-          {Title: "Citizen", MaxNum: 5,
-          CurrentNum: 0},
-          {Title: "Werewolf", MaxNum: 3,
-          CurrentNum: 0},
-          {Title: "FortuneTeller", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Knight", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Madman", MaxNum: 2,
-          CurrentNum: 0},
+          { Title: "Citizen", MaxNum: 6, CurrentNum: 0 },
+          { Title: "Werewolf", MaxNum: 3, CurrentNum: 0 },
+          { Title: "FortuneTeller", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Knight", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Madman", MaxNum: 2, CurrentNum: 0 },
         ];
         this.getRandomRole(roles);
-      } else if (this.players.length === 11){
+      } else if (this.players.length === 12) {
         roles = [
-          {Title: "Citizen", MaxNum: 5,
-          CurrentNum: 0},
-          {Title: "Werewolf", MaxNum: 2,
-          CurrentNum: 0},
-          {Title: "FortuneTeller", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Knight", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Madman", MaxNum: 2,
-          CurrentNum: 0},
+          { Title: "Citizen", MaxNum: 5, CurrentNum: 0 },
+          { Title: "Werewolf", MaxNum: 3, CurrentNum: 0 },
+          { Title: "FortuneTeller", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Knight", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Madman", MaxNum: 2, CurrentNum: 0 },
         ];
         this.getRandomRole(roles);
-      } else if (this.players.length === 10){
+      } else if (this.players.length === 11) {
         roles = [
-          {Title: "Citizen", MaxNum: 4,
-          CurrentNum: 0},
-          {Title: "Werewolf", MaxNum: 2,
-          CurrentNum: 0},
-          {Title: "FortuneTeller", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Knight", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Madman", MaxNum: 2,
-          CurrentNum: 0},
+          { Title: "Citizen", MaxNum: 5, CurrentNum: 0 },
+          { Title: "Werewolf", MaxNum: 2, CurrentNum: 0 },
+          { Title: "FortuneTeller", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Knight", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Madman", MaxNum: 2, CurrentNum: 0 },
         ];
         this.getRandomRole(roles);
-      } else if (this.players.length === 9){
+      } else if (this.players.length === 10) {
         roles = [
-          {Title: "Citizen", MaxNum: 4,
-          CurrentNum: 0},
-          {Title: "Werewolf", MaxNum: 2,
-          CurrentNum: 0},
-          {Title: "FortuneTeller", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Knight", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Madman", MaxNum: 1,
-          CurrentNum: 0},
+          { Title: "Citizen", MaxNum: 4, CurrentNum: 0 },
+          { Title: "Werewolf", MaxNum: 2, CurrentNum: 0 },
+          { Title: "FortuneTeller", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Knight", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Madman", MaxNum: 2, CurrentNum: 0 },
         ];
         this.getRandomRole(roles);
-      } else if (this.players.length === 8){
+      } else if (this.players.length === 9) {
         roles = [
-          {Title: "Citizen", MaxNum: 3,
-          CurrentNum: 0},
-          {Title: "Werewolf", MaxNum: 2,
-          CurrentNum: 0},
-          {Title: "FortuneTeller", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Knight", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Madman", MaxNum: 1,
-          CurrentNum: 0},
+          { Title: "Citizen", MaxNum: 4, CurrentNum: 0 },
+          { Title: "Werewolf", MaxNum: 2, CurrentNum: 0 },
+          { Title: "FortuneTeller", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Knight", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Madman", MaxNum: 1, CurrentNum: 0 },
         ];
         this.getRandomRole(roles);
-      } else if (this.players.length === 7){
+      } else if (this.players.length === 8) {
         roles = [
-          {Title: "Citizen", MaxNum: 2,
-          CurrentNum: 0},
-          {Title: "Werewolf", MaxNum: 2,
-          CurrentNum: 0},
-          {Title: "FortuneTeller", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Knight", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Madman", MaxNum: 1,
-          CurrentNum: 0},
+          { Title: "Citizen", MaxNum: 3, CurrentNum: 0 },
+          { Title: "Werewolf", MaxNum: 2, CurrentNum: 0 },
+          { Title: "FortuneTeller", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Knight", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Madman", MaxNum: 1, CurrentNum: 0 },
         ];
         this.getRandomRole(roles);
-      } else if (this.players.length === 6){
+      } else if (this.players.length === 7) {
         roles = [
-          {Title: "Citizen", MaxNum: 2,
-          CurrentNum: 0},
-          {Title: "Werewolf", MaxNum: 2,
-          CurrentNum: 0},
-          {Title: "FortuneTeller", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Knight", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Madman", MaxNum: 0,
-          CurrentNum: 0},
+          { Title: "Citizen", MaxNum: 2, CurrentNum: 0 },
+          { Title: "Werewolf", MaxNum: 2, CurrentNum: 0 },
+          { Title: "FortuneTeller", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Knight", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Madman", MaxNum: 1, CurrentNum: 0 },
         ];
         this.getRandomRole(roles);
-      } else if (this.players.length === 5){
+      } else if (this.players.length === 6) {
         roles = [
-          {Title: "Citizen", MaxNum: 2,
-          CurrentNum: 0},
-          {Title: "Werewolf", MaxNum: 1,
-          CurrentNum: 0},
-          {Title: "FortuneTeller", MaxNum: 0,
-          CurrentNum: 0},
-           {Title: "Knight", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Madman", MaxNum: 1,
-          CurrentNum: 0},
+          { Title: "Citizen", MaxNum: 2, CurrentNum: 0 },
+          { Title: "Werewolf", MaxNum: 2, CurrentNum: 0 },
+          { Title: "FortuneTeller", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Knight", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Madman", MaxNum: 0, CurrentNum: 0 },
         ];
         this.getRandomRole(roles);
-      } else if (this.players.length === 4){
+      } else if (this.players.length === 5) {
         roles = [
-          {Title: "Citizen", MaxNum: 1,
-          CurrentNum: 0},
-          {Title: "Werewolf", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "FortuneTeller", MaxNum: 0,
-          CurrentNum: 0},
-           {Title: "Knight", MaxNum: 1,
-          CurrentNum: 0},
-           {Title: "Madman", MaxNum: 1,
-          CurrentNum: 0},
+          { Title: "Citizen", MaxNum: 2, CurrentNum: 0 },
+          { Title: "Werewolf", MaxNum: 1, CurrentNum: 0 },
+          { Title: "FortuneTeller", MaxNum: 0, CurrentNum: 0 },
+          { Title: "Knight", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Madman", MaxNum: 1, CurrentNum: 0 },
+        ];
+        this.getRandomRole(roles);
+      } else if (this.players.length === 4) {
+        roles = [
+          { Title: "Citizen", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Werewolf", MaxNum: 1, CurrentNum: 0 },
+          { Title: "FortuneTeller", MaxNum: 0, CurrentNum: 0 },
+          { Title: "Knight", MaxNum: 1, CurrentNum: 0 },
+          { Title: "Madman", MaxNum: 1, CurrentNum: 0 },
         ];
         this.getRandomRole(roles);
       }
-      
+
       let roomName = this.roomName;
       let players = this.players;
-      this.socket.emit("ASSIGN-ROLES", {roomName, players})
-    }, 
+      this.socket.emit("ASSIGN-ROLES", { roomName, players });
+    },
 
     getRandomRole(roles) {
       this.players.forEach((player) => {
-        while(player.role === ""){
-        var index = Math.floor(Math.random() *roles.length);
-        var role = roles[index];
-        console.log (role.MaxNum, role.CurrentNum);
-        if (role.MaxNum > role.CurrentNum){
-          role.CurrentNum += 1;
-          player.role = role.Title
+        while (player.role === "") {
+          var index = Math.floor(Math.random() * roles.length);
+          var role = roles[index];
+          console.log(role.MaxNum, role.CurrentNum);
+          if (role.MaxNum > role.CurrentNum) {
+            role.CurrentNum += 1;
+            player.role = role.Title;
           }
         }
-      }
-      )
+      });
     },
 
-    vote(id) {
-      alert("Vote: passed to Game.vue " + id);
-      //票数集計
-      this.voteCandidates[0].vote = this.voteCandidates[0].vote + 1;
-      //対象に投票
-      this.voteCandidates[id].vote = this.voteCandidates[id].vote + 1;
+    vote(data) {
+      let roomName = this.roomName;
+      let targetId = data.id;
+      let voterId = data.yourId;
 
-      alert(
-        "vote check:\n" +
-          "PlayerID:" +
-          this.voteCandidates[id].id +
-          "-" +
-          this.voteCandidates[id].vote
-      );
-      //票が集まったらソート
-      if (this.alivePlayers.length === this.voteCandidates[0].vote) {
-        this.voteCandidates.sort(function(a, b) {
+      // 処刑対象の配列に処刑対象のIDを格納
+      this.voteCandidates = [...this.voteCandidates, targetId];
+      // 処刑者を配列に格納
+      this.voters = [...this.voters, voterId];
+      alert(this.voters.length + "/" + this.alivePlayers.length);
+      console.log("CheckPoint1");
+
+      // 投票結果を共有
+      this.socket.emit("PLAYER-VOTE", {
+        roomName,
+        targetId,
+        voterId,
+      });
+
+      //票が集まったら処刑フェーズに
+      if (this.alivePlayers.length === this.voters.length) {
+        alert("投票が終わりました");
+        //票数順にソート
+        this.voteCandidates.sort(function (a, b) {
           if (a.vote < b.value) return 1;
           if (a.vote > b.vote) return -1;
           return 0;
         });
-        //処刑
-        alert("Execution:" + this.voteCandidates[1].id);
+        //票数が多いプレイヤーを処刑
         this.players.forEach((player) => {
-          if (player.id === this.voteCandidates[1].id) {
+          if (player.id === this.voteCandidates[0]) {
             player.status = "dead";
-            this.voteCandidates = [];
+            alert(player.name + "が処刑されました");
           }
         });
-
-        this.voteCandidates.forEach((voteCandidate) => {
-          voteCandidate.vote = 0;
+        this.voteCandidates = [];
+        this.voters = [];
+        //処刑結果を共有;
+        this.socket.emit("EXECUTE-RESULT", {
+          roomName,
+          targetId,
+          voterId,
         });
       }
     },
@@ -554,7 +551,6 @@ export default {
     },
   },
 };
-
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

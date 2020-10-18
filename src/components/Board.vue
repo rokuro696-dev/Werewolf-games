@@ -33,6 +33,12 @@ export default {
     id: String,
   },
   methods: {
+    vote(data) {
+      let id = data.id;
+      let yourId = data.yourId;
+      // Game.vueの"vote"メソッド発火
+      this.$emit("vote", { id, yourId });
+    },
     attack(data) {
       let id = data.id;
       let yourId = data.yourId;
@@ -51,9 +57,6 @@ export default {
           playerComponent.clearAttackedStatus();
         }
       });
-    },
-    vote(id) {
-      this.$emit("vote", id);
     },
   },
 };

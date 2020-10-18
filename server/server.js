@@ -13,29 +13,29 @@ app
   .listen(process.env.PORT || port_client);
 
 // WebSocket
-const server = app.listen(port_server, function() {
+const server = app.listen(port_server, function () {
   console.log("server running on port 9090");
 });
 const io = socket(server);
 
 io.on("connection", (socket) => {
-  socket.on("ENTER-ROOM", function(data) {
+  socket.on("ENTER-ROOM", function (data) {
     console.log(
       "プレイヤー [" +
-        data.playerName +
-        "] が [" +
-        data.roomName +
-        "] に入場しました。" +
-        socket.id
+      data.playerName +
+      "] が [" +
+      data.roomName +
+      "] に入場しました。" +
+      socket.id
     );
     socket.join(data.roomName);
     socket.to(data.roomName).broadcast.emit("USER-ENTERED", data);
 
-    socket.on("PASS-PLAYERS", function(data) {
+    socket.on("PASS-PLAYERS", function (data) {
       socket.to(data.roomName).broadcast.emit("PASS-PLAYERS", data.players);
     });
 
-    socket.on("PASS-GAMESTATE", function(data) {
+    socket.on("PASS-GAMESTATE", function (data) {
       const gameState = data.gameState;
       socket.to(data.roomName).broadcast.emit("PASS-GAMESTATE", { gameState });
     });
@@ -47,24 +47,43 @@ io.on("connection", (socket) => {
     });
 
     // 役職割当
-    socket.on("ASSIGN-ROLES", function(data) {
+    socket.on("ASSIGN-ROLES", function (data) {
       socket.to(data.roomName).broadcast.emit("ROLES-ASSIGNED", data.players);
     });
 
     // ゲームスタート
-    socket.on("START-GAME", function(data) {
+    socket.on("START-GAME", function (data) {
       socket.to(data.roomName).broadcast.emit("GAME-STARTED", data.gameState);
     });
 
     // ターン進行
-    socket.on("CHANGE-GAMESTATE", function(data) {
+    socket.on("CHANGE-GAMESTATE", function (data) {
       socket
         .to(data.roomName)
         .broadcast.emit("GAMESTATE-CHANGED", data.gameState);
     });
 
+    // 投票
+    socket.on("PLAYER-VOTE", function (data) {
+      let targetId = data.targetId;
+      let voterId = data.voterId;
+      console.log("PLAYER-VOTE＞投票状況共有＞PLAYER-VOTED");
+      socket
+        .to(data.roomName)
+        .broadcast.emit("PLAYER-VOTED", { targetId, voterId });
+    });
+
+    // 投票結果
+    socket.on("EXECUTE-RESULT", function (data) {
+      let targetId = data.targetId;
+      let voterId = data.voterId;
+      socket
+        .to(data.roomName)
+        .broadcast.emit("EXECUTE-RESULT", { targetId, voterId });
+    });
+
     // 襲撃
-    socket.on("WEREWOLF-ATTACK", function(data) {
+    socket.on("WEREWOLF-ATTACK", function (data) {
       let targetId = data.targetId;
       let wolfId = data.wolfId;
       socket
@@ -73,7 +92,7 @@ io.on("connection", (socket) => {
     });
 
     // 襲撃結果
-    socket.on("ATTACK-RESULT", function(data) {
+    socket.on("ATTACK-RESULT", function (data) {
       let targetId = data.targetId;
       let wolfId = data.wolfId;
       socket
@@ -82,7 +101,7 @@ io.on("connection", (socket) => {
     });
 
     // 襲撃再投票
-    socket.on("WEREWOLF-REVOTE", function(data) {
+    socket.on("WEREWOLF-REVOTE", function (data) {
       socket.to(data.roomName).broadcast.emit("WEREWOLF-REVOTE");
     });
   });

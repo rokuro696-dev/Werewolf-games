@@ -1,5 +1,5 @@
 <template>
-  <button style="width: 250px; height:250px">
+  <button style="width: 250px; height: 250px">
     {{ name }}
     <div>
       <p v-if="this.role === 'Citizen'">
@@ -37,16 +37,19 @@
         ></Werewolf>
       </p>
       <p v-else>役職を決めてください。</p>
-      <div v-if="gameState === 'noon' && status === 'alive'">
-        投票する
-        <li v-for="target in alivePlayers" :key="target.id">
-          <input
-            type="submit"
-            :value="target.name"
-            class="btn"
-            @click="vote(target.id)"
-          />
-        </li>
+      <div v-if="gameState === 'noon' && status === 'alive' && id === yourId">
+        <div v-if="voted === false || (voted === true && voteTarget === '')">
+          投票する
+          <li v-for="target in alivePlayers" :key="target.id">
+            <input
+              type="submit"
+              :value="target.name"
+              class="btn"
+              @click="vote(target.id, target.name)"
+            />
+          </li>
+        </div>
+        <div v-if="voted === true">{{ voteTarget }}に投票しました</div>
       </div>
     </div>
     {{ status }}
@@ -77,14 +80,16 @@ export default {
     status: String,
     otherPlayers: Array,
     gameState: String,
+    voted: Boolean,
   },
   data() {
     return {
       attacked: false,
+      voteTarget: "",
     };
   },
   computed: {
-    alivePlayers: function() {
+    alivePlayers: function () {
       var alivePlayers = [];
       this.otherPlayers.forEach((player) => {
         if (
@@ -96,7 +101,7 @@ export default {
       });
       return alivePlayers;
     },
-    attackablePlayers: function() {
+    attackablePlayers: function () {
       var attackablePlayers = [];
       this.alivePlayers.forEach((player) => {
         if (player.role !== "Werewolf") attackablePlayers.push(player);
@@ -105,6 +110,13 @@ export default {
     },
   },
   methods: {
+    vote(id, name) {
+      let yourId = this.yourId;
+      // Board.vueの"vote"メソッド発火
+      this.voteTarget = name;
+      this.voted = true;
+      this.$emit("vote", { id, yourId });
+    },
     attack(data) {
       let id = data.id;
       let yourId = data.yourId;
@@ -122,13 +134,13 @@ export default {
       );
       this.$emit("check", id);
     },
+    clearVotedStatus() {
+      this.voted = false;
+      this.votearget = "";
+    },
     clearAttackedStatus() {
       this.attacked = false;
       this.$refs.WerewolfComponent.attackTarget = "";
-    },
-    vote(id) {
-      alert("clicked on " + id + " from Player.vue");
-      this.$emit("vote", id);
     },
   },
 };
