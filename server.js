@@ -4,20 +4,17 @@ const https = require('https');
 const express = require('express');
 const socketIO = require('socket.io');
 const config = require('./config');
-
+const { DataConsumer } = require('mediasoup/lib/types');
+const peer = require('./peer.js');
 
 // Global variables
 let worker;
 let webServer;
 let socketServer;
 let expressApp;
-let producer;
-let consumer;
-let producerTransport;
-let consumerTransport;
 let mediasoupRouter;
 
-let isCreatedRouter = false;
+let peers = new Map();
 
 (async () => {
   try {
@@ -86,10 +83,29 @@ async function runSocketServer() {
   socketServer.on('connection', (socket) => {
     console.log('client connected');
 
-    // inform the client about existence of producer
-    if (producer) {
-      socket.emit('newProducer');
-    }
+    socket.on('join', ({name}, callback) =>{
+      //regist peer 
+      console.log('user joined :' + name)
+      // if (!roomList.has(room_id)) {
+      //     return cb({
+      //         error: 'room does not exist'
+      //     })
+      // }
+      addPeer(new peer(socket.id, name))
+
+      // return room info
+      callback()
+
+    });
+
+    socket.on('getProducers', () => {
+      // send all the current producer to newly joined member
+      // if (!roomList.has(socket.room_id)) return
+      let producerList = getProducerListForPeer()
+
+      socket.emit('newProducers', producerList)
+    })
+
 
     socket.on('disconnect', () => {
       console.log('client disconnected');
@@ -102,75 +118,81 @@ async function runSocketServer() {
     socket.on('getRouterRtpCapabilities', (data, callback) => {
       callback({
         data:mediasoupRouter.rtpCapabilities,
-        routerStatus:isCreatedRouter
+        // routerStatus:isCreatedRouter
       });
     });
 
-    socket.on('createProducerTransport', async (data, callback) => {
+    socket.on('createWebRtcTransport', async (_, callback) => {
+      console.log(`create webrtc transport user: ${peers.get(socket.id).name}`);
       try {
-        const { transport, params } = await createWebRtcTransport();
-        producerTransport = transport;
-        callback(params);
+          const {
+              params
+          } = await createWebRtcTransport(socket.id);
+          callback(params);
       } catch (err) {
-        console.error(err);
-        callback({ error: err.message });
+          console.error(err);
+          callback({
+              error: err.message
+          });
       }
-    });
+  });
+    socket.on('connectTransport', async ({
+      transport_id,
+      dtlsParameters
+  }, callback) => {
+      console.log(`connect transport user: ${peers.get(socket.id).name}`)
+      // if (!roomList.has(socket.room_id)) return
+      await connectPeerTransport(socket.id, transport_id, dtlsParameters)
+      
+      callback('success')
+  })
 
-    socket.on('createConsumerTransport', async (data, callback) => {
-      try {
-        const { transport, params } = await createWebRtcTransport();
-        consumerTransport = transport;
-        callback(params);
-      } catch (err) {
-        console.error(err);
-        callback({ error: err.message });
-      }
-    });
+  
 
-    socket.on('connectProducerTransport', async (data, callback) => {
-      await producerTransport.connect({ dtlsParameters: data.dtlsParameters });
+    socket.on('produce', async ({kind, rtpParameters, producerTransportId}, callback) => {
+      // const {kind, rtpParameters} = data;
+      // TODO refactor
+      producer = await peers.get(socket.id).transports.get(producerTransportId).produce({ kind, rtpParameters });
+      
+      peers.get(socket.id).producers.set(producer.id, producer);
 
-      callback();
-    });
-
-    socket.on('connectConsumerTransport', async (data, callback) => {
-      await consumerTransport.connect({ dtlsParameters: data.dtlsParameters });
-      callback();
-    });
-
-    socket.on('produce', async (data, callback) => {
-      const {kind, rtpParameters} = data;
-      producer = await producerTransport.produce({ kind, rtpParameters });
+      console.log('created produce ' + producer.id + ' client id ' + socket.id);
       callback({ id: producer.id });
 
       // inform clients about new producer
-      socket.broadcast.emit('newProducer');
-
-      console.log(isCreatedRouter)
-      
-      if (isCreatedRouter){
-        //接続したらpush通知
-        socketServer.sockets.emit('server-send-message', {
-        status: 'add',
-    });
-
-      };
-      if (!isCreatedRouter){
-        // console.log('set')
-          isCreatedRouter=true
-        };
+      broadCast(socket, socket.id, 'newProducers', [{
+        producer_id: producer.id ,
+        producer_socket_id: socket.id
+    }])
+      // socket.broadcast.emit('newProducer', {
+      //   id: producer.id
+      // });
         
     });
 
-    socket.on('consume', async (data, callback) => {
-      callback(await createConsumer(producer, data.rtpCapabilities));
+    socket.on('consume', async ({consumerTransportId, producerId, rtpCapabilities}, callback) => {
+      console.log('request consume produce ' + producerId + ' clientId ' + socket.id)
+      // producer = producers[data.id]
+      let param = await createConsumer(consumerTransportId, producerId, rtpCapabilities, socket.id);
+      
+      callback(param);
+      //TODO consumerのクローズ処理を入れる
     });
 
     socket.on('resume', async (data, callback) => {
+      // TODO リクエストしたIDごとにresumeすべきconsumerを選ぶようにする
+      // for (var key in consumers){
+      //   await consumers[key].resume();
+      // };
       await consumer.resume();
       callback();
     });
+
+    socket.on('checkProducer', async(data, callback) =>{
+      ids = Object.keys(producers)
+      console.log('response for new client ' + ids)
+      callback({ids: ids});
+    })
   });
 }
 
@@ -191,14 +213,14 @@ async function runMediasoupWorker() {
   mediasoupRouter = await worker.createRouter({ mediaCodecs });
 }
 
-async function createWebRtcTransport() {
+async function createWebRtcTransport(socket_id) {
   const {
     maxIncomingBitrate,
     initialAvailableOutgoingBitrate
   } = config.mediasoup.webRtcTransport;
 
   const transport = await mediasoupRouter.createWebRtcTransport({
-    listenIps: config.mediasoup.webRtcTransport.listenIps,
+    listenIps: config.mediasoup.webRtcTransport.listenIps, //TODO assign client Ips
     enableUdp: true,
     enableTcp: true,
     preferUdp: true,
@@ -210,6 +232,8 @@ async function createWebRtcTransport() {
     } catch (error) {
     }
   }
+
+  peers.get(socket_id).transports.set(transport.id, transport)
   return {
     transport,
     params: {
@@ -221,22 +245,35 @@ async function createWebRtcTransport() {
   };
 }
 
-async function createConsumer(producer, rtpCapabilities) {
+async function connectPeerTransport(socket_id, transport_id, dtlsParameters){
+  await peers.get(socket_id).transports.get(transport_id).connect({
+      dtlsParameters: dtlsParameters
+  });
+}
+
+async function createConsumer(consumer_transport_id, producer_id, rtpCapabilities, socket_id) {
   if (!mediasoupRouter.canConsume(
     {
-      producerId: producer.id,
+      producerId: producer_id,
       rtpCapabilities,
     })
   ) {
     console.error('can not consume');
     return;
   }
+  let consumerTransport = peers.get(socket_id).transports.get(consumer_transport_id)
+  let consumer = null
+
   try {
     consumer = await consumerTransport.consume({
-      producerId: producer.id,
+      producerId: producer_id,
       rtpCapabilities,
-      paused: producer.kind === 'video',
+      paused: false
+      // paused: producer.kind === 'video',
     });
+    console.log('create new consumer  for producer ' + producer_id +  'consumerId ' +  consumer.id + ' client Id ' + socket_id);
+
+    peers.get(socket_id).consumers.set(consumer.id, consumer)
   } catch (error) {
     console.error('consume failed', error);
     return;
@@ -246,12 +283,37 @@ async function createConsumer(producer, rtpCapabilities) {
     await consumer.setPreferredLayers({ spatialLayer: 2, temporalLayer: 2 });
   }
 
+
   return {
-    producerId: producer.id,
+    producerId: producer_id,
     id: consumer.id,
     kind: consumer.kind,
     rtpParameters: consumer.rtpParameters,
     type: consumer.type,
     producerPaused: consumer.producerPaused
-  };
+  }
+}
+
+function addPeer(peer){
+  peers.set(peer.id, peer)
+}
+
+
+function getProducerListForPeer() {
+  let producerList = []
+  peers.forEach(peer => {
+      peer.producers.forEach(producer => {
+          producerList.push({
+              producer_id: producer.id
+          })
+      })
+  })
+  return producerList
+  
+}
+
+function broadCast(socket, socket_id, name, data){
+  for (let otherID of Array.from(peers.keys()).filter(id => id !== socket_id)) {
+    socketServer.to(otherID).emit(name, data)
+  }
 }
