@@ -2,9 +2,9 @@
   "name": "werewolf-games",
   "version": "1.2.2",
   "description": "Werewolf Games",
-  "main": "server.js",
+  "main": "init.js",
   "scripts": {
-    "start": "browserify rtc-client.js -o app-bundle.js; node server.js"
+    "start": "browserify rtc-client.js -o app-bundle.js; node init.js"
   },
   "author": "",
   "license": "ISC",

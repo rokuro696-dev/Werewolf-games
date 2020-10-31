@@ -28,11 +28,28 @@ npm start
     * socket.io エンドポイント起動とスタンバイ
     * ルーター情報の取得とローカルメディアへの登録
     * 新規参加者イベント時のComsumer
-    * (A.I.)新規参加者が参加した場合の `mediasoup.Comsumer` の立ち上げ  
+    * 新規参加者が参加した場合の `mediasoup.Comsumer` の立ち上げ  
 
-* server.js
+* init.js
     * サーバーの初期起動(HTTPS, sokcet.io)
     * socket.io 起動準備
     * mediasoup の `Worker` 立ち上げ
-    * `mediasoup.Producer` の送付
-    * `mediasoup.Comsumer` 要求の受け取り、作成、送付
+    * Roomオブジェクトの作成
+
+* room.js
+    * Roomオブジェクトの初期化
+    * 参加者情報の発行
+    * Roomに紐づくデータの管理
+     * 参加者情報
+     * router
+     * ルーム名 (ID)
+    * (暫定) producerの発行 (Peerに移行予定)
+
+* peer.js
+    * Peerオブジェクトの初期化
+    * 参加者に紐づくデータの管理
+        * transport
+        * pruducer
+        * consumer
+    * 参加者と紐づくProducerの発行 (将来的にこちらに移行予定)
+    * 参加者が依頼したConsumerの発行
