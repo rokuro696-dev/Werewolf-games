@@ -1,5 +1,11 @@
 <template>
   <div class="board">
+    <h2 v-if="this.gameState === 'preparation'">ゲームを始めます</h2>
+    <h2 v-if="this.gameState === 'vote'">昼のターンです</h2>
+    <h2 v-if="this.gameState === 'Night'">夜のターンです</h2>
+    <!-- ToDo：勝利チーム計算のロジックを実装し、ここでデータを受けとり表示させる（いつきくん） -->
+    <h2 v-if="this.gameState === 'Result'">勝利チームはXXです</h2>
+
     <div v-if="this.gameState === 'reveal'">
       <Announcement
         :yourRole="yourRole"
@@ -23,7 +29,10 @@
         @vote="vote"
       ></Player>
     </div>
-
+    <div v-if="this.gameState === 'discussion'">
+      <h2 class="position">あなたの役割は</h2>
+      <h2 class="position">{{this.yourRole}}</h2>
+    </div>  
   </div>
 </template>
 

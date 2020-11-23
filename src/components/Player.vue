@@ -1,59 +1,71 @@
 <template>
-  <button style="width: 250px; height: 250px">
-    {{ name }}
-    <div>
-      <p v-if="this.role === 'Citizen'">
-        <Citizen></Citizen>
-      </p>
-      <p v-else-if="this.role === 'FortuneTeller'">
-        <FortuneTeller
-          :id="id"
-          :yourId="yourId"
-          :gameState="gameState"
-          :validTargets="alivePlayers"
-          @check="check"
-        ></FortuneTeller>
-      </p>
-      <p v-else-if="this.role === 'Knight'">
-        <Knight
-          :gameState="gameState"
-          :yourId="yourId"
-          :validTargets="alivePlayers"
-          @protect="protect"
-        ></Knight>
-      </p>
-      <p v-else-if="this.role === 'Madman'">
-        <Madman></Madman>
-      </p>
-      <p v-else-if="this.role === 'Werewolf'">
-        <Werewolf
-          :id="id"
-          :yourId="yourId"
-          :gameState="gameState"
-          :validTargets="attackablePlayers"
-          :attacked="attacked"
-          ref="WerewolfComponent"
-          @attack="attack"
-        ></Werewolf>
-      </p>
-      <p v-else>役職を決めてください。</p>
-      <div v-if="gameState === 'noon' && status === 'alive' && id === yourId">
-        <div v-if="voted === false || (voted === true && voteTarget === '')">
-          投票する
-          <li v-for="target in alivePlayers" :key="target.id">
-            <input
-              type="submit"
-              :value="target.name"
-              class="btn"
-              @click="vote(target.id, target.name)"
-            />
-          </li>
+ <div>
+    <video class="video" autoplay controls>  </video>
+    <button style="width: 250px; height: 100px; z-index: 100">
+      {{ name }}
+      <div>
+        <p v-if="this.role === 'Citizen'">
+          <Citizen></Citizen>
+        </p>
+        <p v-else-if="this.role === 'FortuneTeller'">
+          <FortuneTeller
+            :id="id"
+            :yourId="yourId"
+            :gameState="gameState"
+            :validTargets="alivePlayers"
+            @check="check"
+          ></FortuneTeller>
+        </p>
+        <p v-else-if="this.role === 'Knight'">
+          <Knight
+            :gameState="gameState"
+            :yourId="yourId"
+            :validTargets="alivePlayers"
+            @protect="protect"
+          ></Knight>
+        </p>
+        <p v-else-if="this.role === 'Madman'">
+          <Madman></Madman>
+        </p>
+        <p v-else-if="this.role === 'Werewolf'">
+          <Werewolf
+            :id="id"
+            :yourId="yourId"
+            :gameState="gameState"
+            :validTargets="attackablePlayers"
+            :attacked="attacked"
+            ref="WerewolfComponent"
+            @attack="attack"
+          ></Werewolf>
+        </p>
+        <p v-else>役職を決めてください。</p>
+        <div v-if="gameState === 'noon' && status === 'alive' && id !== yourId">
+          <div v-if="voted === false || (voted === true && voteTarget === '')">
+            投票する
+            <!-- <li v-for="target in alivePlayers" :key="target.id">
+              <input
+                type="submit"
+                :value="target.name"
+                class="btn"
+                @click="vote(target.id, target.name)"
+              />
+            </li> -->
+             <input
+                type="submit"
+                :value="name"
+                class="btn"
+                @click="vote(id, name)"
+              />
+          </div>
+          <div v-if="voted === true">{{ voteTarget }}に投票しました</div>
         </div>
-        <div v-if="voted === true">{{ voteTarget }}に投票しました</div>
+        <div v-else-if="gameState === 'noon' && status === 'alive' && id === yourId">
+        投票してください
+        </div>
       </div>
-    </div>
-    {{ status }}
-  </button>
+      {{ status }}
+    </button>
+   </div>
 </template>
 
 <script>

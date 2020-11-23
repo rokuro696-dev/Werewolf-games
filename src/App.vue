@@ -84,6 +84,7 @@ h2 {
   border-color: #C4DFE6;
   border-width: thick;
   background: -webkit-linear-gradient(top right, #336B87, #90AFC5);
+  z-index: -100;
 }
 
 .nextPage {

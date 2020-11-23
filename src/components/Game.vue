@@ -11,16 +11,14 @@
       @check="check"
       @vote="vote"
     />
+    
     <div v-if="this.gameState === 'preparation'">
-      <button button v-on:click="assignRoles">Assign Roles</button>
-    </div>
-    <div v-if="this.gameState === 'preparation'">
-      <button v-on:click="startGame">ゲームを開始</button>
+      <button style="width: 200px; height: 80px" v-on:click="startGame">ゲームを開始</button>
     </div>
     <div v-else>
-      <a class="nextPage" v-on:click="changeGameState">次のターンに進む</a>
+      <a class="nextPage" v-on:click="changeGameState">投票に進む</a>
     </div>
-    <div>現在は {{ this.gameState }}</div>
+    <!-- <div>現在は {{ this.gameState }}</div> -->
   </div>
 </template>
 
@@ -171,6 +169,7 @@ export default {
           this.players.forEach((player) => {
             if (player.id === this.voteCandidates[0]) {
               player.status = "dead";
+              //ToDo 夜に進む旨を伝えるアラーとして実装（ヨシヤス）
               alert(player.name + "が処刑されました");
             }
           });
@@ -187,6 +186,8 @@ export default {
       let wolfId = data.wolfId;
 
       if (this.yourRole === "Werewolf" && this.id !== wolfId) {
+        // ToDo: Target IDではなくTarget Nameを受け取れるよう変更（いつきくん）
+        alert(data.wolfId + "が" + data.targetId + "を襲撃しました");
         // 襲撃対象の配列に襲撃対象のIDを格納
         this.attackCandidates = [...this.attackCandidates, targetId];
         // 襲撃者を配列に格納
@@ -505,11 +506,12 @@ export default {
       });
     },
     startGame() {
+      this.assignRoles()
       this.gameState = "reveal";
       const roomName = this.roomName;
       const gameState = this.gameState;
       this.socket.emit("START-GAME", { roomName, gameState });
-    },
+          },
     startNoon() {
       this.gameState = "noon";
       const roomName = this.roomName;
